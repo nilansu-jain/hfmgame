@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
@@ -10,6 +11,8 @@ import '../exception/app_exceptions.dart';
 import 'base_api_services.dart';
 
 class Networkapiservices extends BaseApiServices{
+  final Dio dio = Dio();
+
   @override
   Future<dynamic> getApi(String url) async{
     dynamic jsonResponse;
@@ -43,15 +46,17 @@ class Networkapiservices extends BaseApiServices{
   }
 
   @override
-  Future<dynamic> postApi(String url, var data) async{
+  Future<dynamic> postApi(String url, var data,{var header}) async{
     dynamic jsonResponse;
     try{
       if(kDebugMode) {
         print("URL ::: $url");
         print("Params :: $data");
+        print("Header :: $header");
       }
       var response = await http.post(Uri.parse(url),
-      body: data).timeout(const Duration(seconds: 30));
+      body: data,
+      headers: header).timeout(const Duration(seconds: 30));
 
       jsonResponse = returnResponse(response);
 
@@ -67,6 +72,22 @@ class Networkapiservices extends BaseApiServices{
     }
   }
 
+  Future<dynamic> postMultipartApi(
+      String url,
+      FormData formData,
+      ) async {
+    final response = await dio.post(
+      url,
+      data: formData,
+      options: Options(
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      ),
+    );
+
+    return response.data;
+  }
 
   dynamic returnResponse(http.Response response){
     switch(response.statusCode){

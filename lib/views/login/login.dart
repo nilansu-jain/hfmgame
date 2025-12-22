@@ -1,4 +1,6 @@
 
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -6,6 +8,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gaanap_admin_new/res/color/colors.dart';
 import 'package:gaanap_admin_new/res/images/images.dart';
 import 'package:gaanap_admin_new/utils/Utils.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 import '../../utils/enums.dart';
 
 import '../../bloc/login/login_bloc.dart';
@@ -27,7 +31,8 @@ class _LoginState extends State<Login> {
   final usernameFocusNode = FocusNode();
   final gameCodeFocusnode = FocusNode();
   final emailFocusnode = FocusNode();
-
+  File? _image;
+  final ImagePicker _picker = ImagePicker();
 
   late LoginBloc _loginBloc;
 
@@ -35,6 +40,8 @@ class _LoginState extends State<Login> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    WakelockPlus.disable();
+
     _loginBloc = LoginBloc(loginRepository: getit());
   }
 
@@ -146,6 +153,8 @@ class _LoginState extends State<Login> {
                         ],
                       ),
                     ),
+
+
                     const SizedBox(height: 20,),
 
                     Container(
@@ -184,33 +193,42 @@ class _LoginState extends State<Login> {
                         ],
                       ),
                     ),
-                    // const SizedBox(height: 20,),
-                    // Container(
-                    //   decoration: BoxDecoration(
-                    //       borderRadius: BorderRadius.circular(10),
-                    //       color: AppColors.white,
-                    //       border: Border.all(color: Colors.black)
-                    //   ),
-                    //   padding: EdgeInsets.symmetric(horizontal: 10),
-                    //   child: Row(
-                    //     children: [
-                    //       Icon(Icons.lock_outline),
-                    //       const SizedBox(width: 10,),
-                    //       Expanded(
-                    //         child: TextFormField(
-                    //           decoration: InputDecoration(
-                    //             hintText: "Upload Photo (Optional)",
-                    //             border: InputBorder.none,
-                    //             enabled: false
-                    //           ),
-                    //           textInputAction: TextInputAction.done,
-                    //         ),
-                    //       ),
-                    //     ],
-                    //   ),
-                    // ),
 
                     const SizedBox(height: 20,),
+
+                    InkWell(
+                      onTap:(){
+                        showImageSource(context);
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: AppColors.white,
+                            border: Border.all(color: Colors.black)
+                        ),
+                        padding: EdgeInsets.symmetric(horizontal: 10),
+                        child: Row(
+                          children: [
+                            Icon(Icons.account_circle_sharp),
+                            const SizedBox(width: 10,),
+                            Expanded(
+                              child: TextFormField(
+                                decoration: InputDecoration(
+                                  hintText: _image?.path != null ? _image?.path : "Upload Photo (Optional)",
+                                  border: InputBorder.none,
+                                ),
+                                textInputAction: TextInputAction.done,
+                                enabled: false,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 20,),
+
+
                     BlocConsumer<LoginBloc, LoginState>(
                       listener: (context,state){
                         if(state.loginApiStatus == LoginApiStatus.success){
@@ -271,6 +289,45 @@ class _LoginState extends State<Login> {
     );
   }
 
+  void showImageSource(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (_) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: const Icon(Icons.camera_alt),
+            title: const Text("Camera"),
+            onTap: () {
+              Navigator.pop(context);
+              pickImage(ImageSource.camera);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.photo),
+            title: const Text("Gallery"),
+            onTap: () {
+              Navigator.pop(context);
+              pickImage(ImageSource.gallery);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> pickImage(ImageSource source) async {
+    final XFile? pickedFile = await _picker.pickImage(
+      source: source,
+      imageQuality: 70, // compress image
+    );
+
+    if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path);
+      });
+    }
+  }
   bool isValidEmail(String email) {
     return RegExp(r"^[\w\.-]+@[\w\.-]+\.\w{2,}$").hasMatch(email);
   }

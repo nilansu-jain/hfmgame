@@ -51,7 +51,12 @@ dependencies:
   flutter_svg: ^2.0.7
   firebase_core: ^3.3.0
   firebase_database: ^11.0.5
+  image_picker: ^1.1.2
 #  firebase_app_check: ^0.3.1
+  dio: ^5.4.3
+  wakelock_plus: ^1.2.8
+
+
 
 
 

@@ -4,9 +4,11 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:gaanap_admin_new/bloc/event/event_bloc.dart';
+import 'package:gaanap_admin_new/config/app_url.dart';
 import 'package:gaanap_admin_new/config/routes/routes_name.dart';
 import 'package:gaanap_admin_new/main.dart';
 import 'package:gaanap_admin_new/models/user/user_model.dart';
@@ -35,10 +37,13 @@ class _EventDetailsState extends State<EventDetails> {
 
   late FirebaseDatabase db1;
   late DatabaseReference dbref;
+  late StreamSubscription<DatabaseEvent> dbSub;
 
 
   var gameId;
   var hostId;
+
+  var fireData;
   @override
   void initState() {
     // TODO: implement initState
@@ -46,28 +51,80 @@ class _EventDetailsState extends State<EventDetails> {
 
     db1 = FirebaseDatabase.instanceFor(
       app: Firebase.app(),
-      databaseURL: "https://hfmgame-live.firebaseio.com",
+      databaseURL: AppUrl.firebaseUrl,
     );
-
-    dbref = db1.ref("gplgame");
-
-    dbref.onValue.listen((event) {
-      final data = event.snapshot.value;
-
-      print("🔥 REALTIME DATA: $data");
-
-    });
 
     _eventBloc= EventBloc(eventRepository: getit());
     userModel= SessionController().userModel;
-    Future.delayed(Duration(seconds: 5), () {
-      if (mounted) {
-        setState(() {
-          isActive = true;
-        });
+
+    dbref = db1.ref(AppUrl.fireDatabaseName);
+
+    dbSub=dbref.onValue.listen((event) {
+      final data = event.snapshot.value;
+      fireData=data;
+      debugPrint("🔥 REALTIME DATA: $data");
+      if(fireData != null){
+        getData();
+      }else{
+        isActive=false;
       }
+
     });
+
+
+
   }
+
+
+
+  getData(){
+    if (!mounted) return; // ⛔ VERY IMPORTANT
+
+    gameId = userModel.gameDetails?.id.toString() ?? "0";
+    var gameActivated = fireData["gameActivated"];
+    var clipscreen = fireData["globalClipScreenChange"];
+    var globalFinalScoreboard = fireData["globalFinalScoreboard"];
+
+
+    if(clipscreen != null){
+      dbSub.cancel();
+      if(globalFinalScoreboard != null && globalFinalScoreboard['data'] != null){
+        dbSub.cancel();
+        Navigator.of(context).pushNamedAndRemoveUntil(RoutesName.finalScorecard, (route) => false,
+          arguments: {
+            "game_id": fireData["gameActivated"]["game_id"].toString(),
+          },);
+
+      }else{
+        Navigator.of(context).pushNamedAndRemoveUntil(RoutesName.gameScreen, (route) => false,
+          arguments: {
+            "game_id": fireData["gameActivated"]["game_id"].toString(),
+            "host_id": fireData["gameActivated"]["host_id"].toString(),
+          },);
+      }
+
+    }
+    isActive=false;
+    if(gameActivated == null)  return;
+    String fireGameId = fireData["gameActivated"]["game_id"].toString() ?? "";
+
+    hostId= fireData["gameActivated"]["host_id"].toString();
+
+    if( gameId.toString().contains(fireGameId.toString())){
+      context.read<EventBloc>().add(GetGameDataEvent(game_id: gameId,
+        host_id: hostId,));
+      setState(() {
+        isActive = true;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    dbSub.cancel(); // 🔥 stops Firebase stream
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -84,12 +141,8 @@ class _EventDetailsState extends State<EventDetails> {
         actions: [
           IconButton(onPressed: (){
 
-            LocalStorage localStorage = LocalStorage();
-            localStorage.deleteData('user').then((value){
-              localStorage.deleteData('isLogin').then((value) {
-                Navigator.of(context).pushNamed(RoutesName.splashScreen);
-              });
-            });
+            logout(context);
+
           },
               icon: Icon(Icons.logout)),
         ],
@@ -125,79 +178,85 @@ class _EventDetailsState extends State<EventDetails> {
                   ),),
 
                 const SizedBox(height: 10,),
-                Row(
-                  children: [
-                    Icon(Icons.watch_later_outlined,
-                      color: Colors.grey.shade500,
-                    ),
-                    const SizedBox(width: 5,),
+                Visibility(
+                  visible: false,
+                  child: Row(
+                    children: [
+                      Icon(Icons.watch_later_outlined,
+                        color: Colors.grey.shade500,
+                      ),
+                      const SizedBox(width: 5,),
 
-                    Text("IST",
+                      Text("IST",
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                              color: Colors.grey.shade500,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w400
+                          )
+                      ),
+                      const SizedBox(width: 10,),
+
+                      Text("09:00 AM",
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                            color: Colors.grey.shade500,
+                            color: Colors.black,
                             fontSize: 16,
                             fontWeight: FontWeight.w400
-                        )
-                    ),
-                    const SizedBox(width: 10,),
+                        ),),
 
-                    Text("09:00 AM",
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w400
-                      ),),
+                      const SizedBox(width: 20,),
 
-                    const SizedBox(width: 20,),
+                      Text("CST",
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                              color: Colors.grey.shade500,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w400
+                          )
+                      ),
+                      const SizedBox(width: 10,),
 
-                    Text("CST",
+                      Text("09:30 PM",
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                            color: Colors.grey.shade500,
+                            color: Colors.black,
                             fontSize: 16,
                             fontWeight: FontWeight.w400
-                        )
-                    ),
-                    const SizedBox(width: 10,),
-
-                    Text("09:30 PM",
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w400
-                      ),),
-                  ],
+                        ),),
+                    ],
+                  ),
                 ),
 
                 const SizedBox(height: 10,),
-                Row(
-                  children: [
-                    Icon(Icons.list,
-                      color: Colors.grey.shade500,
-                    ),
-                    const SizedBox(width: 5,),
+                Visibility(
+                  visible: false,
+                  child: Row(
+                    children: [
+                      Icon(Icons.list,
+                        color: Colors.grey.shade500,
+                      ),
+                      const SizedBox(width: 5,),
 
-                    Text("Questions",
+                      Text("Questions",
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                              color: Colors.grey.shade500,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w400
+                          )
+                      ),
+                      const SizedBox(width: 10,),
+
+                      Text("${userModel.gameDetails?.noOfClips ?? ""}",
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                            color: Colors.grey.shade500,
+                            color: Colors.black,
                             fontSize: 16,
                             fontWeight: FontWeight.w400
-                        )
-                    ),
-                    const SizedBox(width: 10,),
-
-                    Text("${userModel.gameDetails?.noOfClips ?? ""}",
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w400
-                      ),),
-                  ],
+                        ),),
+                    ],
+                  ),
                 )
               ],
             )
@@ -206,7 +265,15 @@ class _EventDetailsState extends State<EventDetails> {
             BlocConsumer<EventBloc, EventState>(
               listener: (context, state) {
                 if(state.apiStatus == EventStatus.completed){
-                  showToast(state.message);
+                  // showToast(state.message);
+                  dbSub.cancel();  // 💥 stops listening instantly
+
+                  Navigator.of(context).pushNamedAndRemoveUntil(RoutesName.gameLoading, (route) => false,
+                       arguments: {
+                         "game_id": gameId,
+                         "host_id": hostId,
+                       },);
+
                 }
                 if(state.apiStatus == EventStatus.error){
                   showToast(state.message);

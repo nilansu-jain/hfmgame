@@ -9,8 +9,25 @@
    static const String wrong = 'assets/images/wrong.png';
 
    static const String saStar = 'assets/images/sa_star.png';
-   static const String saRectRight = 'assets/images/sa_rectangle_right.png';
-   static const String saRectLeft= 'assets/images/sa_rectangle_left.png';
+   static const String saRectRight = 'assets/images/sa_rect_right.png';
+   static const String saRectLeft= 'assets/images/sa_rect_left.png';
+
+   static const String reStar = 'assets/images/re_star.png';
+   static const String reRectRight = 'assets/images/re_rect_right.png';
+   static const String reRectLeft= 'assets/images/re_rect_left.png';
+
+   static const String gaStar = 'assets/images/ga_star.png';
+   static const String gaRectRight = 'assets/images/ga_rect_right.png';
+   static const String gaRectLeft= 'assets/images/ga_rect_left.png';
+
+   static const String maStar = 'assets/images/ma_star.png';
+   static const String maRectRight = 'assets/images/ma_rect_right.png';
+   static const String maRectLeft= 'assets/images/ma_rect_left.png';
+
+   static const String paStar = 'assets/images/pa_star.png';
+   static const String paRectRight = 'assets/images/pa_rect_right.png';
+   static const String paRectLeft= 'assets/images/pa_rect_left.png';
+
 
    static const String Option1Icon = 'assets/images/op1.png';
    static const String Option2Icon = 'assets/images/op2.png';

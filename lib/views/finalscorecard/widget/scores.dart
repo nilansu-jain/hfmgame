@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:gaanap_admin_new/models/final_scoreboard_model.dart';
 import 'package:gaanap_admin_new/res/images/images.dart';
 
 class Scores extends StatelessWidget {
-  const Scores({Key? key}) : super(key: key);
+  final FinalScoreModel model;
+  final int index;
+   Scores({Key? key, required this.model, required this.index}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -17,24 +20,33 @@ class Scores extends StatelessWidget {
             ),
             alignment: Alignment.center,
             padding: EdgeInsets.symmetric(vertical: 8,horizontal: 25),
-            child: Text("25"),
+            child: Text("${index+1}"),
           ),
           const SizedBox(width: 20,),
-          ClipOval(
-            child: Image.asset(AppImages.star,
-            height: 50,
-            width: 50,),
+          CircleAvatar(
+            radius: 30,
+            backgroundColor: Colors.white,
+            child: CircleAvatar(
+              radius: 27,
+              backgroundImage: model.profilePhoto != null
+                  ? AssetImage(model.profilePhoto!)
+                  : null,
+              child: model.profilePhoto == null
+                  ? const Icon(Icons.person, size: 30)
+                  : null,
+            ),
           ),
+
           const SizedBox(width: 20,),
 
-          Text("Krishna",
+          Text("${model.fullName}",
           style: TextStyle(
             color: Colors.black,
             fontSize: 18
           ),
           overflow: TextOverflow.ellipsis,),
           Spacer(),
-          Text("19886",
+          Text("${model.totalScore}",
             style: TextStyle(
                 color: Colors.black,
                 fontSize: 18

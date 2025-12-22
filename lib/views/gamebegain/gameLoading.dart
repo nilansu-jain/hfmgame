@@ -1,10 +1,26 @@
+import 'dart:async';
+
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gaanap_admin_new/config/routes/routes_name.dart';
 import 'package:gaanap_admin_new/res/images/images.dart';
 
+import '../../bloc/event/event_bloc.dart';
+import '../../config/app_url.dart';
+import '../../main.dart';
+import '../../utils/Utils.dart';
+
 class GameLoading extends StatefulWidget {
-  const GameLoading({Key? key}) : super(key: key);
+  final String hostid;
+  final String gameid;
+
+  const GameLoading({Key? key,
+  required this.gameid,
+  required this.hostid}) : super(key: key);
 
   @override
   State<GameLoading> createState() => _GameLoadingState();
@@ -12,17 +28,54 @@ class GameLoading extends StatefulWidget {
 
 class _GameLoadingState extends State<GameLoading> {
 
+  late EventBloc _eventBloc;
+  late FirebaseDatabase db1;
+  late DatabaseReference dbref;
+  var fireData;
+  late StreamSubscription<DatabaseEvent> dbSub;
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    Future.delayed(Duration(seconds: 1), () {
-      if (mounted) {
-       Navigator.of(context).pushNamedAndRemoveUntil(RoutesName.gameScreen, (route) => false);
+    db1 = FirebaseDatabase.instanceFor(
+      app: Firebase.app(),
+      databaseURL: AppUrl.firebaseUrl,
+    );
+    dbref = db1.ref(AppUrl.fireDatabaseName);
+    _eventBloc= EventBloc(eventRepository: getit());
+    dbSub= dbref.onValue.listen((event) {
+      final data = event.snapshot.value;
+      fireData=data;
+      debugPrint("🔥 REALTIME DATA: $data");
+      if(fireData != null){
+        var clipscreen = fireData["globalClipScreenChange"];
+
+        if(clipscreen != null){
+          dbSub.cancel();  // 💥 stops listening instantly
+          Navigator.of(context).pushNamedAndRemoveUntil(RoutesName.gameScreen, (route) => false,
+            arguments: {
+              "game_id": widget.gameid,
+              "host_id": widget.hostid,
+            },);
+        }
+
       }
+
+
     });
 
+    context.read<EventBloc>().add(GetGameDataEvent(game_id: widget.gameid,
+        host_id: widget.hostid,));
+
   }
+
+  @override
+  void dispose() {
+    dbSub.cancel(); // 🔥 stops Firebase stream
+    super.dispose();
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -51,12 +104,18 @@ class _GameLoadingState extends State<GameLoading> {
                   fontWeight: FontWeight.bold
                 ),
                 textAlign: TextAlign.center,),
-
                 Spacer(),
+
+                // Visibility(
+                //
+                //   child: Center(
+                //     child: Image.asset(AppImages.logo,
+                //     height: 300,
+                //     width: 300,),
+                //   ),
+                // ),
                 Center(
-                  child: Image.asset(AppImages.play,
-                  height: 100,
-                  width: 100,),
+                  child: Container(),
                 ),
                 Spacer(),
 

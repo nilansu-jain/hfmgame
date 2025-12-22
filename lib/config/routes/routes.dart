@@ -30,16 +30,30 @@ class Routes{
           return MaterialPageRoute(builder: (context) => const EventDetails());
 
         case RoutesName.gameLoading:
-          return MaterialPageRoute(builder: (context) => const GameLoading());
+          final args = settings.arguments as Map<String, dynamic>?;
+
+          return MaterialPageRoute(builder: (context) =>  GameLoading(
+            gameid: args?["game_id"],
+            hostid: args?["host_id"],
+          ));
 
         case RoutesName.gameScreen:
-          return MaterialPageRoute(builder: (context) => const GameScreen());
+          final args = settings.arguments as Map<String, dynamic>?;
+
+          return MaterialPageRoute(builder: (context) =>  GameScreen(
+            gameid: args?["game_id"],
+            hostid: args?["host_id"],
+          ));
 
         case RoutesName.gameOver:
           return MaterialPageRoute(builder: (context) => const GameOver());
 
         case RoutesName.finalScorecard:
-          return MaterialPageRoute(builder: (context) => const FinalScorecard());
+          final args = settings.arguments as Map<String, dynamic>?;
+
+          return MaterialPageRoute(builder: (context) =>  FinalScorecard(
+            gameid: args?["game_id"],
+          ));
 
         default:
           return MaterialPageRoute(builder: (context) {

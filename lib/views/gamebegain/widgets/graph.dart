@@ -3,35 +3,40 @@ import 'package:gaanap_admin_new/res/color/colors.dart';
 import 'package:gaanap_admin_new/res/images/images.dart';
 
 class FourBarGraph extends StatelessWidget {
-  final List<Map<String, dynamic>> items = [
-    {
-      "label": "A",
-      "value": 18,
-      "color": AppColors.op1Color,
-      "image": AppImages.optionC1,
-    },
-    {
-      "label": "B",
-      "value": 10,
-      "color": AppColors.op2Color,
-      "image": AppImages.optionC2,
-    },
-    {
-      "label": "C",
-      "value": 6,
-      "color": AppColors.op3Color,
-      "image": AppImages.optionC3,
-    },
-    {
-      "label": "D",
-      "value": 3,
-      "color": AppColors.op4Color,
-      "image": AppImages.optionC4,
-    },
-  ];
+  final List<int> playerValues;
+  FourBarGraph({required this.playerValues});
+
+
 
   @override
   Widget build(BuildContext context) {
+    final List<Map<String, dynamic>> items = [
+      {
+        "label": "A",
+        "value": playerValues[0],
+        "color": AppColors.op1Color,
+        "image": AppImages.optionC1,
+      },
+      {
+        "label": "B",
+        "value": playerValues[1],
+        "color": AppColors.op2Color,
+        "image": AppImages.optionC2,
+      },
+      {
+        "label": "C",
+        "value": playerValues[2],
+        "color": AppColors.op3Color,
+        "image": AppImages.optionC3,
+      },
+      {
+        "label": "D",
+        "value": playerValues[3],
+        "color": AppColors.op4Color,
+        "image": AppImages.optionC4,
+      },
+    ];
+
     double maxValue = items.fold(
       0.0,
           (prev, e) => (e['value'] as num).toDouble() > prev
@@ -39,8 +44,9 @@ class FourBarGraph extends StatelessWidget {
           : prev,
     );
     return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: items.map((item) {
-        double widthFactor = item['value'] / maxValue;
+        double widthFactor = maxValue == 0 ? 0.0 : (item['value'] / maxValue);
 
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 10),

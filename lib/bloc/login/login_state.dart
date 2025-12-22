@@ -5,6 +5,7 @@ part of 'login_bloc.dart';
    String username;
    String gameCode;
    String email;
+   File? image;
 
    String message;
    bool visible;
@@ -16,7 +17,8 @@ part of 'login_bloc.dart';
      this.gameCode='',
      this.message ='',
      this.visible = false,
-     this.loginApiStatus = LoginApiStatus.initial
+     this.loginApiStatus = LoginApiStatus.initial,
+     this.image
  });
 
    LoginState copyWith({
@@ -25,7 +27,8 @@ part of 'login_bloc.dart';
      String? gameCode,
      String? message,
      bool? visible,
-     LoginApiStatus? loginApiStatus
+     LoginApiStatus? loginApiStatus,
+     File? image
 
    }){
      return LoginState(
@@ -34,13 +37,14 @@ part of 'login_bloc.dart';
          gameCode: gameCode ?? this.gameCode,
        message: message ?? this.message,
        visible: visible ?? this.visible,
-       loginApiStatus: loginApiStatus ?? this.loginApiStatus
+       loginApiStatus: loginApiStatus ?? this.loginApiStatus,
+       image: image ?? this.image
      );
    }
 
   @override
   // TODO: implement props
-  List<Object?> get props => [email,gameCode,visible,loginApiStatus,message,username];
+  List<Object?> get props => [email,gameCode,visible,loginApiStatus,message,username,image];
 
  }
 

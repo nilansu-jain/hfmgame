@@ -1,3 +1,5 @@
+
+import 'dart:io';
 import 'dart:math';
 
 import 'package:bloc/bloc.dart';
@@ -47,9 +49,10 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     Map data ={
       "user_name":state.username,
       "game_code":state.gameCode,
-      "email":state.email
+      "email":state.email,
+      "profile_photo":state.image
     };
-    await loginRepository.loginApi( data).then((value) async{
+    await loginRepository.loginApi( state.username,state.gameCode,state.email,state.image).then((value) async{
       if(value.status?.contains('error') ?? false){
         emit(state.copyWith(loginApiStatus: LoginApiStatus.error, message: value.message));
 

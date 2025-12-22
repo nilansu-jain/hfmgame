@@ -19,8 +19,9 @@ class _GameOverState extends State<GameOver> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    Future.delayed(Duration(seconds: 5),(){
-      Navigator.of(context).pushNamedAndRemoveUntil(RoutesName.finalScorecard, (route) => false);
+    Future.delayed(Duration(seconds: 2),(){
+      Navigator.of(context).pop();
+      // Navigator.of(context).pushNamedAndRemoveUntil(RoutesName.finalScorecard, (route) => false);
 
     });
   }
