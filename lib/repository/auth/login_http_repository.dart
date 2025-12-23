@@ -19,6 +19,7 @@ class LoginHttpRepository implements LoginRepository{
        String gameCode,
        String email,
       File? profilePhoto,) async{
+    debugPrint("profile photo :: ${profilePhoto?.path}");
     final formData = FormData.fromMap({
       "user_name": username,
       "game_code": gameCode,
@@ -29,6 +30,7 @@ class LoginHttpRepository implements LoginRepository{
           filename: profilePhoto.path.split('/').last,
         ),
     });
+    debugPrint("Form Data :: ${formData}");
     var response = await _api.postMultipartApi(AppUrl.loginUrl, formData);
     debugPrint("Data : ${UserModel.fromJson(response)}");
     return UserModel.fromJson(response);

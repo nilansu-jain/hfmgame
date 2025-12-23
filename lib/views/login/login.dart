@@ -9,7 +9,6 @@ import 'package:gaanap_admin_new/res/color/colors.dart';
 import 'package:gaanap_admin_new/res/images/images.dart';
 import 'package:gaanap_admin_new/utils/Utils.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:wakelock_plus/wakelock_plus.dart';
 import '../../utils/enums.dart';
 
 import '../../bloc/login/login_bloc.dart';
@@ -40,7 +39,7 @@ class _LoginState extends State<Login> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    WakelockPlus.disable();
+    // WakelockPlus.disable();
 
     _loginBloc = LoginBloc(loginRepository: getit());
   }
@@ -214,7 +213,7 @@ class _LoginState extends State<Login> {
                             Expanded(
                               child: TextFormField(
                                 decoration: InputDecoration(
-                                  hintText: _image?.path != null ? _image?.path : "Upload Photo (Optional)",
+                                  hintText: _image?.path != null ? _image!.path.split('/').last : "Upload Photo (Optional)",
                                   border: InputBorder.none,
                                 ),
                                 textInputAction: TextInputAction.done,
@@ -326,6 +325,8 @@ class _LoginState extends State<Login> {
       setState(() {
         _image = File(pickedFile.path);
       });
+      context.read<LoginBloc>().add(UploadImageEvent(image: _image!));
+
     }
   }
   bool isValidEmail(String email) {

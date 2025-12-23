@@ -236,10 +236,11 @@ class _FinalScorecardState extends State<FinalScorecard> {
                 visible: finalScoreList.length > 3,
                 child: Expanded(child:
                 Container(
+                  color: AppColors.white,
                   margin: EdgeInsets.only(top: 10),
                   child: ListView.separated(
                   itemBuilder: (context,index){
-                    return Scores(model: finalScoreList[index],index: index,);
+                    return Scores(model: finalScoreList[index+3],index: index,);
                   },
                     separatorBuilder: (context,index){
                   return Container(
@@ -249,7 +250,7 @@ class _FinalScorecardState extends State<FinalScorecard> {
                     color: Colors.grey.shade300,
                   );
                               },
-                   itemCount: finalScoreList.length,
+                   itemCount: finalScoreList.length-3,
                   ),
                 ),
                 ),

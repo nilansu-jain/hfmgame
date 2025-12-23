@@ -10,16 +10,22 @@ class Scores extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 10),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey),
+        borderRadius: BorderRadius.circular(10)
+      ),
+      padding: EdgeInsets.symmetric(vertical: 4,horizontal: 8),
+      margin: EdgeInsets.symmetric(horizontal: 10),
       child: Row(
         children: [
           Container(
             decoration: BoxDecoration(
               color: Colors.grey.shade300,
-              borderRadius: BorderRadius.only(topRight: Radius.circular(20),bottomLeft: Radius.circular(20))
+              borderRadius: BorderRadius.only(topRight: Radius.circular(20),bottomLeft: Radius.circular(20)),
+
             ),
             alignment: Alignment.center,
-            padding: EdgeInsets.symmetric(vertical: 8,horizontal: 25),
+            padding: EdgeInsets.symmetric(vertical: 4,horizontal: 20),
             child: Text("${index+1}"),
           ),
           const SizedBox(width: 20,),
@@ -27,10 +33,8 @@ class Scores extends StatelessWidget {
             radius: 30,
             backgroundColor: Colors.white,
             child: CircleAvatar(
-              radius: 27,
-              backgroundImage: model.profilePhoto != null
-                  ? AssetImage(model.profilePhoto!)
-                  : null,
+              radius: 30,
+              backgroundImage:getProfileImage(model.profilePhoto),
               child: model.profilePhoto == null
                   ? const Icon(Icons.person, size: 30)
                   : null,
@@ -56,4 +60,15 @@ class Scores extends StatelessWidget {
       ),
     );
   }
+
+  ImageProvider getProfileImage(String? image) {
+    if (image == null || image.isEmpty) {
+      return AssetImage(AppImages.noUserImage);
+    } else if (image.startsWith('http')) {
+      return NetworkImage(image);
+    } else {
+      return AssetImage(AppImages.noUserImage);
+    }
+  }
+
 }

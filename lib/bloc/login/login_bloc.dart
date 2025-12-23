@@ -20,7 +20,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     on<EmailChange>(_EmailChange);
     on<GameCodeChange>(_GameCodeChange);
     on<UsernameChange>(_UsernameChange);
-
+    on<UploadImageEvent>(_uploadImage);
     on<SubmitButton>(_submit);
     on<PasswordVisible>(_visibillity);
   }
@@ -73,6 +73,12 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   void _visibillity(PasswordVisible event, Emitter<LoginState> emit){
     emit(
       state.copyWith(visible: event.visible,loginApiStatus: LoginApiStatus.initial)
+    );
+  }
+
+  void _uploadImage(UploadImageEvent event , Emitter<LoginState> emit){
+    emit(
+        state.copyWith(image: event.image,loginApiStatus: LoginApiStatus.initial)
     );
   }
 }

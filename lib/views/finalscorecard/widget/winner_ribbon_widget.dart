@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gaanap_admin_new/res/images/images.dart';
 
 class WinnerRibbonWidget extends StatelessWidget {
   final String ribbonImage;
@@ -46,15 +47,13 @@ class WinnerRibbonWidget extends StatelessWidget {
                 top: 8,
                 child:
                 CircleAvatar(
-                  radius: 30,
-                  backgroundColor: Colors.white,
+                  radius: 40,
+
                   child: CircleAvatar(
-                    radius: 27,
-                    backgroundImage: profileImage != null
-                        ? AssetImage(profileImage!)
-                        : null,
+                    radius: 40,
+                    backgroundImage: getProfileImage(profileImage),
                     child: profileImage == null
-                        ? const Icon(Icons.person, size: 30)
+                        ? const Icon(Icons.person, size: 50)
                         : null,
                   ),
                 ),
@@ -77,5 +76,15 @@ class WinnerRibbonWidget extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  ImageProvider getProfileImage(String? image) {
+    if (image == null || image.isEmpty) {
+      return AssetImage(AppImages.noUserImage);
+    } else if (image.startsWith('http')) {
+      return NetworkImage(image);
+    } else {
+      return AssetImage(AppImages.noUserImage);
+    }
   }
 }

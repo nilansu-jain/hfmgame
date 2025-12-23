@@ -60,3 +60,16 @@ class PasswordVisible extends LoginEvent{
   // TODO: implement props
   List<Object> get props => [visible];
 }
+
+class UploadImageEvent extends LoginEvent{
+  File image;
+
+  UploadImageEvent({
+    required this.image
+  });
+
+  @override
+  // TODO: implement props
+  List<Object> get props => [image];
+}
+

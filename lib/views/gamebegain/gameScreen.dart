@@ -20,7 +20,6 @@ import 'package:gaanap_admin_new/views/gamebegain/widgets/graph.dart';
 import 'package:gaanap_admin_new/views/gamebegain/widgets/textthumbshape.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../../bloc/event/event_bloc.dart';
 import '../../config/app_url.dart';
@@ -80,7 +79,7 @@ class _GameScreenState extends State<GameScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    WakelockPlus.enable();
+    // WakelockPlus.enable();
 
     getGameData();
     db1 = FirebaseDatabase.instanceFor(
@@ -944,7 +943,13 @@ class _GameScreenState extends State<GameScreen> {
         height: MediaQuery.of(context).size.height,
         width: MediaQuery.of(context).size.width,
         decoration: BoxDecoration(
-          image: DecorationImage(
+          color: answerPerform == "wrong"
+              ? AppColors.scoreWrongColor
+              : null,
+          image:
+          answerPerform == 'wrong'
+              ? null // ❌ hide image
+              : DecorationImage(
               image: AssetImage(AppImages.scorecardBg,),
               fit: BoxFit.fill
           ),
@@ -954,10 +959,13 @@ class _GameScreenState extends State<GameScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            answerPerform == 'wrong'
+            ?Container()
+           :
             Image.asset(AppImages.star),
             const SizedBox(height: 20),
             Text(
-              "${answerPerform == 'right' ? "Awesome" : "Whoo!"} ${name.toUpperCase()}",
+              "${answerPerform == 'right' ? "Awesome" : "Sorry!"}, ${name.toUpperCase()}",
               style: GoogleFonts.roboto(
                 fontSize: 35,
                 color: Colors.white,
@@ -966,13 +974,14 @@ class _GameScreenState extends State<GameScreen> {
               ),
             ),
             Text(
-              "You got the ${answerPerform}",
+              "${answerPerform == 'wrong' ? "That is not the right answer!" : "You got the right answer!"}",
               style: GoogleFonts.roboto(
                 fontSize: 30,
                 color: Colors.white,
                 fontWeight: FontWeight.w300,
                 height: 1.0,
               ),
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 50),
 
@@ -1016,7 +1025,7 @@ class _GameScreenState extends State<GameScreen> {
                       fontSize: 25,
                       fontWeight: FontWeight.w500,
                       height: 1.0,
-                      color: AppColors.op4Color,
+                      color: answerPerform == 'right' ? AppColors.op4Color : AppColors.op2Color,
 
                     ),
                   ),
@@ -1049,7 +1058,7 @@ class _GameScreenState extends State<GameScreen> {
                         fontSize: 25,
                         fontWeight: FontWeight.w500,
                         height: 1.0,
-                        color: AppColors.op4Color,
+                        color: answerPerform == 'right' ? AppColors.op4Color : AppColors.op2Color,
 
                       ),
                     ),

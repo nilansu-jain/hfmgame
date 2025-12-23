@@ -51,6 +51,8 @@
    static const String ribbon2 = 'assets/images/ribbon-2.png';
    static const String ribbon3 = 'assets/images/ribbon-3.png';
    static const String scorecardBg = 'assets/images/scoreboard-bg.png';
+   static const String noUserImage = 'assets/images/no_user_img.png';
+
 
    static const String splash = 'assets/svg/splash.svg';
    static const String logoSvg = 'assets/svg/logo.svg';

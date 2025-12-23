@@ -27,6 +27,7 @@ class AppColors{
   static const Color wrongAnswerColor = Color(0xFFEF233C);
   static const Color rightAnswerColor = Color(0xFF04EB84);
 
+  static const Color scoreWrongColor = Color(0x9FF70000);
 
 
 
