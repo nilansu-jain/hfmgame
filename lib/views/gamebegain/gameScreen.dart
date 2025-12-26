@@ -74,11 +74,13 @@ class _GameScreenState extends State<GameScreen> {
 
   final AudioPlayer _player = AudioPlayer();
   late StreamSubscription<DatabaseEvent> dbSub;
+  LocalStorage localStorage = LocalStorage();
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+
     // WakelockPlus.enable();
 
     getGameData();
@@ -98,6 +100,8 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   fireDataManage() async{
+    await localStorage.addData("game_status", "gameStart");
+
     getGameData();
 
     userModel= await SessionController().userModel;
@@ -208,6 +212,7 @@ class _GameScreenState extends State<GameScreen> {
           // context.read<EventBloc>().add(GetClipInfoEvent(clip_id: clipscreen["data"]["clip_id"].toString()));
         }else{
           if(fireData['gameActivated'] == null){
+            _player.stop();
             dbSub.cancel();
             logout(context);
           }
@@ -309,6 +314,7 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   Future<void> playAudio(String url) async {
+    if(gameDataModel.gameSound?.toLowerCase().contains("off") ?? false) return;
     try {
       await _player.setUrl(url);
       _player.play();
@@ -544,7 +550,7 @@ class _GameScreenState extends State<GameScreen> {
               ],
             ),
             const SizedBox(height: 30,),
-            Text("Select the answer choice according to \n listen clip?",
+            Text("Do you recognize the song? \n Click on your answer below.",
             style: TextStyle(
               color: Colors.black,
               fontWeight: FontWeight.w500,
@@ -958,6 +964,7 @@ class _GameScreenState extends State<GameScreen> {
         alignment: Alignment.center,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             answerPerform == 'wrong'
             ?Container()
@@ -1002,15 +1009,15 @@ class _GameScreenState extends State<GameScreen> {
                   TextSpan(
                     text: "+${currentClipScoreEarn} ",
                     style: GoogleFonts.roboto(
-                      fontSize: 25,
-                      fontWeight: FontWeight.w500,
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
                       height: 1.0,
                       color: AppColors.op2Color,
 
                     ),
                   ),
                   TextSpan(
-                    text: "and your \n Total is now ",
+                    text: "and your \n Total score is now ",
                     style: GoogleFonts.roboto(
                       fontSize: 25,
                       fontWeight: FontWeight.w400,
@@ -1022,10 +1029,10 @@ class _GameScreenState extends State<GameScreen> {
                   TextSpan(
                     text: "${totalUserScore} ",
                     style: GoogleFonts.roboto(
-                      fontSize: 25,
-                      fontWeight: FontWeight.w500,
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
                       height: 1.0,
-                      color: answerPerform == 'right' ? AppColors.op4Color : AppColors.op2Color,
+                      color: answerPerform == 'right' ? AppColors.op4Color : AppColors.primaryColor,
 
                     ),
                   ),
@@ -1043,7 +1050,7 @@ class _GameScreenState extends State<GameScreen> {
                 text: TextSpan(
                   children: [
                     TextSpan(
-                      text: "You added And you are now \n ",
+                      text: "And you are now number \n ",
                       style: GoogleFonts.roboto(
                         fontSize: 25,
                         fontWeight: FontWeight.w400,
@@ -1053,15 +1060,36 @@ class _GameScreenState extends State<GameScreen> {
                       ),
                     ),
                     TextSpan(
-                      text: "${currentRanking} out of ${totalPlayers} ",
+                      text: "${currentRanking}",
                       style: GoogleFonts.roboto(
-                        fontSize: 25,
-                        fontWeight: FontWeight.w500,
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
                         height: 1.0,
-                        color: answerPerform == 'right' ? AppColors.op4Color : AppColors.op2Color,
+                        color: answerPerform == 'right' ? AppColors.op4Color : AppColors.primaryColor,
 
                       ),
                     ),
+                    TextSpan(
+                      text: " out of ",
+                      style: GoogleFonts.roboto(
+                        fontSize: 25,
+                        fontWeight: FontWeight.w400,
+                        height: 1.0,
+                        color: Colors.white,
+
+                      ),
+                    ),
+                    TextSpan(
+                      text: "${totalPlayers} ",
+                      style: GoogleFonts.roboto(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        height: 1.0,
+                        color: answerPerform == 'right' ? AppColors.op4Color : AppColors.primaryColor,
+
+                      ),
+                    ),
+
                     TextSpan(
                       text: "players",
                       style: GoogleFonts.roboto(

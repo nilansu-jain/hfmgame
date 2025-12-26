@@ -3,19 +3,23 @@ import 'dart:convert';
 class GetGameDataModel {
   Score? score;
   List<Clip>? clips;
+  String? gameSound;
 
   GetGameDataModel({
     this.score,
     this.clips,
+    this.gameSound
   });
 
   GetGameDataModel copyWith({
     Score? score,
     List<Clip>? clips,
+    String? gameSound
   }) =>
       GetGameDataModel(
         score: score ?? this.score,
         clips: clips ?? this.clips,
+         gameSound: gameSound ?? this.gameSound
       );
 
   factory GetGameDataModel.fromRawJson(String str) => GetGameDataModel.fromJson(json.decode(str));
@@ -25,11 +29,15 @@ class GetGameDataModel {
   factory GetGameDataModel.fromJson(Map<String, dynamic> json) => GetGameDataModel(
     score: json["score"] == null ? null : Score.fromJson(json["score"]),
     clips: json["clips"] == null ? [] : List<Clip>.from(json["clips"]!.map((x) => Clip.fromJson(x))),
+    gameSound: json["gameSound"],
+
   );
 
   Map<String, dynamic> toJson() => {
     "score": score?.toJson(),
     "clips": clips == null ? [] : List<dynamic>.from(clips!.map((x) => x.toJson())),
+    "gameSound": gameSound,
+
   };
 }
 

@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gaanap_admin_new/config/routes/routes_name.dart';
 import 'package:gaanap_admin_new/res/images/images.dart';
+import 'package:gaanap_admin_new/services/storage/local_storage.dart';
 
 import '../../bloc/event/event_bloc.dart';
 import '../../config/app_url.dart';
@@ -33,11 +34,13 @@ class _GameLoadingState extends State<GameLoading> {
   late DatabaseReference dbref;
   var fireData;
   late StreamSubscription<DatabaseEvent> dbSub;
-
+  LocalStorage localStorage = LocalStorage();
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    getData();
+
     db1 = FirebaseDatabase.instanceFor(
       app: Firebase.app(),
       databaseURL: AppUrl.firebaseUrl,
@@ -47,7 +50,7 @@ class _GameLoadingState extends State<GameLoading> {
     dbSub= dbref.onValue.listen((event) {
       final data = event.snapshot.value;
       fireData=data;
-      debugPrint("🔥 REALTIME DATA: $data");
+
       if(fireData != null){
         var clipscreen = fireData["globalClipScreenChange"];
 
@@ -67,6 +70,11 @@ class _GameLoadingState extends State<GameLoading> {
 
     context.read<EventBloc>().add(GetGameDataEvent(game_id: widget.gameid,
         host_id: widget.hostid,));
+
+  }
+
+  getData() async{
+    await localStorage.addData("game_status", "loading");
 
   }
 

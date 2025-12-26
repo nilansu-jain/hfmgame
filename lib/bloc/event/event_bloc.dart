@@ -33,6 +33,8 @@ class EventBloc extends Bloc<EventEvent, EventState> {
         emit(state.copyWith(apiStatus: EventStatus.error, message: value.message));
 
       }else{
+        LocalStorage localStorage = LocalStorage();
+        await localStorage.addData("game_status", "joined");
 
         emit(state.copyWith(apiStatus: EventStatus.completed, message: value.message));
 

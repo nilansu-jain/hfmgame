@@ -44,6 +44,8 @@ class _EventDetailsState extends State<EventDetails> {
   var hostId;
 
   var fireData;
+  LocalStorage localStorage = LocalStorage();
+
   @override
   void initState() {
     // TODO: implement initState
@@ -77,7 +79,7 @@ class _EventDetailsState extends State<EventDetails> {
 
 
 
-  getData(){
+  getData() async{
     if (!mounted) return; // ⛔ VERY IMPORTANT
 
     gameId = userModel.gameDetails?.id.toString() ?? "0";
@@ -85,25 +87,6 @@ class _EventDetailsState extends State<EventDetails> {
     var clipscreen = fireData["globalClipScreenChange"];
     var globalFinalScoreboard = fireData["globalFinalScoreboard"];
 
-
-    if(clipscreen != null){
-      dbSub.cancel();
-      if(globalFinalScoreboard != null && globalFinalScoreboard['data'] != null){
-        dbSub.cancel();
-        Navigator.of(context).pushNamedAndRemoveUntil(RoutesName.finalScorecard, (route) => false,
-          arguments: {
-            "game_id": fireData["gameActivated"]["game_id"].toString(),
-          },);
-
-      }else{
-        Navigator.of(context).pushNamedAndRemoveUntil(RoutesName.gameScreen, (route) => false,
-          arguments: {
-            "game_id": fireData["gameActivated"]["game_id"].toString(),
-            "host_id": fireData["gameActivated"]["host_id"].toString(),
-          },);
-      }
-
-    }
     isActive=false;
     if(gameActivated == null)  return;
     String fireGameId = fireData["gameActivated"]["game_id"].toString() ?? "";
@@ -111,12 +94,47 @@ class _EventDetailsState extends State<EventDetails> {
     hostId= fireData["gameActivated"]["host_id"].toString();
 
     if( gameId.toString().contains(fireGameId.toString())){
-      context.read<EventBloc>().add(GetGameDataEvent(game_id: gameId,
+      context.read<EventBloc>().add( GetGameDataEvent(game_id: gameId,
         host_id: hostId,));
       setState(() {
         isActive = true;
       });
     }
+    String gameStatus = await localStorage.getData("game_status");
+      dbSub.cancel();
+
+      if(globalFinalScoreboard != null && globalFinalScoreboard['data'] != null){
+        dbSub.cancel();
+        Navigator.of(context).pushNamedAndRemoveUntil(RoutesName.finalScorecard, (route) => false,
+          arguments: {
+            "game_id": fireData["gameActivated"]["game_id"].toString(),
+          },);
+
+      }
+      else if(gameStatus.contains("joined") || gameStatus.contains("loading")){
+        Navigator.of(context).pushNamedAndRemoveUntil(RoutesName.gameLoading, (route) => false,
+          arguments: {
+            "game_id": gameId,
+            "host_id": hostId,
+          },);
+      }
+      else if(gameStatus.contains("gameStart")){
+        Navigator.of(context).pushNamedAndRemoveUntil(RoutesName.gameScreen, (route) => false,
+          arguments: {
+            "game_id": fireData["gameActivated"]["game_id"].toString(),
+            "host_id": fireData["gameActivated"]["host_id"].toString(),
+          },);
+      }
+      else{
+        // Navigator.of(context).pushNamedAndRemoveUntil(RoutesName.gameScreen, (route) => false,
+        //   arguments: {
+        //     "game_id": fireData["gameActivated"]["game_id"].toString(),
+        //     "host_id": fireData["gameActivated"]["host_id"].toString(),
+        //   },);
+      }
+
+
+
   }
 
   @override

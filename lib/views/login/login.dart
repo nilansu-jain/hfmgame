@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gaanap_admin_new/res/color/colors.dart';
 import 'package:gaanap_admin_new/res/images/images.dart';
+import 'package:gaanap_admin_new/services/storage/local_storage.dart';
 import 'package:gaanap_admin_new/utils/Utils.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../utils/enums.dart';
@@ -35,13 +36,21 @@ class _LoginState extends State<Login> {
 
   late LoginBloc _loginBloc;
 
+  LocalStorage localStorage = LocalStorage();
+
   @override
-  void initState() {
+  void initState()
+  {
     // TODO: implement initState
     super.initState();
     // WakelockPlus.disable();
-
+    getData();
     _loginBloc = LoginBloc(loginRepository: getit());
+  }
+
+  getData() async{
+    await localStorage.addData("game_status", "login");
+
   }
 
   @override
@@ -124,25 +133,24 @@ class _LoginState extends State<Login> {
                       padding: EdgeInsets.symmetric(horizontal: 10),
                       child: Row(
                         children: [
-                          Icon(Icons.lock_outline),
+                          Icon(Icons.email),
                           const SizedBox(width: 10,),
                           Expanded(
                             child: TextFormField(
                               decoration: InputDecoration(
-                                hintText: "Game Code",
+                                hintText: "Email",
                                 border: InputBorder.none,
                               ),
-                              keyboardType: TextInputType.name,
+                              keyboardType: TextInputType.emailAddress,
                               textInputAction: TextInputAction.next,
-                              focusNode: gameCodeFocusnode,
+                              focusNode: emailFocusnode,
                               onChanged: (value) {
-                                print("$value");
-                                context.read<LoginBloc>().add(GameCodeChange(gameCode: value));
+                                context.read<LoginBloc>().add(EmailChange(email: value));
                               },
                               onFieldSubmitted: (value) {},
                               validator: (value) {
                                 if (value!.isEmpty) {
-                                  return "Enter Game Code";
+                                  return "Enter Email Address";
                                 }
 
                                 return null;
@@ -165,24 +173,25 @@ class _LoginState extends State<Login> {
                       padding: EdgeInsets.symmetric(horizontal: 10),
                       child: Row(
                         children: [
-                          Icon(Icons.email),
+                          Icon(Icons.lock_outline),
                           const SizedBox(width: 10,),
                           Expanded(
                             child: TextFormField(
                               decoration: InputDecoration(
-                                hintText: "Email",
+                                hintText: "Game Code",
                                 border: InputBorder.none,
                               ),
-                              keyboardType: TextInputType.emailAddress,
+                              keyboardType: TextInputType.name,
                               textInputAction: TextInputAction.done,
-                              focusNode: emailFocusnode,
+                              focusNode: gameCodeFocusnode,
                               onChanged: (value) {
-                                context.read<LoginBloc>().add(EmailChange(email: value));
+                                print("$value");
+                                context.read<LoginBloc>().add(GameCodeChange(gameCode: value));
                               },
                               onFieldSubmitted: (value) {},
                               validator: (value) {
                                 if (value!.isEmpty) {
-                                  return "Enter Email Address";
+                                  return "Enter Game Code";
                                 }
 
                                 return null;

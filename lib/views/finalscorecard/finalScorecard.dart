@@ -35,6 +35,7 @@ class _FinalScorecardState extends State<FinalScorecard> {
 
   String name= '';
   List<FinalScoreModel> finalScoreList = [];
+  int extraItemCount=0;
 
   @override
   void initState() {
@@ -120,6 +121,8 @@ class _FinalScorecardState extends State<FinalScorecard> {
         .toList();
 
     // debugPrint("Final Scoreboard = ${finalScoreList.length}");
+    extraItemCount =
+    finalScoreList.length > 3 ? finalScoreList.length - 3 : 0;
 
     if (mounted) {
       setState(() {});
@@ -233,7 +236,7 @@ class _FinalScorecardState extends State<FinalScorecard> {
               ),
               ),
               Visibility(
-                visible: finalScoreList.length > 3,
+                visible: extraItemCount> 0,
                 child: Expanded(child:
                 Container(
                   color: AppColors.white,
@@ -250,7 +253,7 @@ class _FinalScorecardState extends State<FinalScorecard> {
                     color: Colors.grey.shade300,
                   );
                               },
-                   itemCount: finalScoreList.length-3,
+                   itemCount: extraItemCount,
                   ),
                 ),
                 ),
