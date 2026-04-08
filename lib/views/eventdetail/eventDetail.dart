@@ -93,6 +93,7 @@ class _EventDetailsState extends State<EventDetails> {
 
     hostId= fireData["gameActivated"]["host_id"].toString();
 
+
     if( gameId.toString().contains(fireGameId.toString())){
       context.read<EventBloc>().add( GetGameDataEvent(game_id: gameId,
         host_id: hostId,));
@@ -171,9 +172,13 @@ class _EventDetailsState extends State<EventDetails> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            Visibility(
+              visible: userModel.gameDetails?.thumbnail?.isNotEmpty ?? false,
+              child:
             Image.network(userModel.gameDetails?.thumbnail ?? '',
-            height: MediaQuery.of(context).size.height *.3,
-            fit: BoxFit.fill,),
+              height: MediaQuery.of(context).size.height *.3,
+              fit: BoxFit.fill,),),
+      
             const SizedBox(height: 20,),
             Padding(padding: EdgeInsets.symmetric(horizontal: 10),
             child:             Column(
@@ -194,7 +199,7 @@ class _EventDetailsState extends State<EventDetails> {
                       fontSize: 16,
                       fontWeight: FontWeight.w400
                   ),),
-
+      
                 const SizedBox(height: 10,),
                 Visibility(
                   visible: false,
@@ -204,7 +209,7 @@ class _EventDetailsState extends State<EventDetails> {
                         color: Colors.grey.shade500,
                       ),
                       const SizedBox(width: 5,),
-
+      
                       Text("IST",
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
@@ -214,7 +219,7 @@ class _EventDetailsState extends State<EventDetails> {
                           )
                       ),
                       const SizedBox(width: 10,),
-
+      
                       Text("09:00 AM",
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -222,9 +227,9 @@ class _EventDetailsState extends State<EventDetails> {
                             fontSize: 16,
                             fontWeight: FontWeight.w400
                         ),),
-
+      
                       const SizedBox(width: 20,),
-
+      
                       Text("CST",
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
@@ -234,7 +239,7 @@ class _EventDetailsState extends State<EventDetails> {
                           )
                       ),
                       const SizedBox(width: 10,),
-
+      
                       Text("09:30 PM",
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -245,7 +250,7 @@ class _EventDetailsState extends State<EventDetails> {
                     ],
                   ),
                 ),
-
+      
                 const SizedBox(height: 10,),
                 Visibility(
                   visible: false,
@@ -255,7 +260,7 @@ class _EventDetailsState extends State<EventDetails> {
                         color: Colors.grey.shade500,
                       ),
                       const SizedBox(width: 5,),
-
+      
                       Text("Questions",
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
@@ -265,7 +270,7 @@ class _EventDetailsState extends State<EventDetails> {
                           )
                       ),
                       const SizedBox(width: 10,),
-
+      
                       Text("${userModel.gameDetails?.noOfClips ?? ""}",
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -280,61 +285,64 @@ class _EventDetailsState extends State<EventDetails> {
             )
               ,),
             Spacer(),
-            BlocConsumer<EventBloc, EventState>(
-              listener: (context, state) {
-                if(state.apiStatus == EventStatus.completed){
-                  // showToast(state.message);
-                  dbSub.cancel();  // 💥 stops listening instantly
-
-                  Navigator.of(context).pushNamedAndRemoveUntil(RoutesName.gameLoading, (route) => false,
-                       arguments: {
-                         "game_id": gameId,
-                         "host_id": hostId,
-                       },);
-
-                }
-                if(state.apiStatus == EventStatus.error){
-                  showToast(state.message);
-                }
-              },
-              builder: (context, state) {
-                return InkWell(
-              onTap: (){
-                if(isActive){
-                  context.read<EventBloc>().add(JoinEvent(game_id: gameId.toString() ?? "0",
-                      host_id: hostId.toString(),
-                      user_id: userModel.user?.id.toString() ?? "0"));
-                  // Navigator.of(context).pushNamed(RoutesName.gameLoading);
-                }else{
-                  showToast("Game is not available right now");
-                }
-              },
-              child: Container(
-                width: MediaQuery.of(context).size.width,
-                height: 50,
-                margin: EdgeInsets.symmetric(vertical: 10,horizontal: 10),
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: isActive ? AppColors.primaryColor : AppColors.lightGrey,
-                  borderRadius: BorderRadius.circular(20)
+            SafeArea(
+              top: false,
+              child: BlocConsumer<EventBloc, EventState>(
+                listener: (context, state) {
+                  if(state.apiStatus == EventStatus.completed){
+                    // showToast(state.message);
+                    dbSub.cancel();  // 💥 stops listening instantly
+                    
+                    Navigator.of(context).pushNamedAndRemoveUntil(RoutesName.gameLoading, (route) => false,
+                         arguments: {
+                           "game_id": gameId,
+                           "host_id": hostId,
+                         },);
+                    
+                  }
+                  if(state.apiStatus == EventStatus.error){
+                    showToast(state.message);
+                  }
+                },
+                builder: (context, state) {
+                  return InkWell(
+                onTap: (){
+                  if(isActive){
+                    context.read<EventBloc>().add(JoinEvent(game_id: gameId.toString() ?? "0",
+                        host_id: hostId.toString(),
+                        user_id: userModel.user?.id.toString() ?? "0"));
+                    // Navigator.of(context).pushNamed(RoutesName.gameLoading);
+                  }else{
+                    showToast("Game is not available right now");
+                  }
+                },
+                child: Container(
+                  width: MediaQuery.of(context).size.width,
+                  height: 50,
+                  margin: EdgeInsets.symmetric(vertical: 10,horizontal: 10),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: isActive ? AppColors.primaryColor : AppColors.lightGrey,
+                    borderRadius: BorderRadius.circular(20)
+                  ),
+                  child:
+                  state.apiStatus == EventStatus.loading
+                  ? Center(
+                    child: CircularProgressIndicator(color: AppColors.white,),
+                  )
+                      :
+                  Text("JOIN",
+                  style: TextStyle(
+                    color: isActive ? Colors.white : Colors.black,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500
+                  ),
+                  textAlign: TextAlign.center,),
                 ),
-                child:
-                state.apiStatus == EventStatus.loading
-                ? Center(
-                  child: CircularProgressIndicator(color: AppColors.white,),
-                )
-                    :
-                Text("JOIN",
-                style: TextStyle(
-                  color: isActive ? Colors.white : Colors.black,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500
-                ),
-                textAlign: TextAlign.center,),
-              ),
-            );
-  },
-)
+              );
+                      },
+                    ),
+            )
           ],
         ),
       ),

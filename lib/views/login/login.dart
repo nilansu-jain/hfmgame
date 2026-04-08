@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gaanap_admin_new/res/color/colors.dart';
@@ -38,6 +39,9 @@ class _LoginState extends State<Login> {
 
   LocalStorage localStorage = LocalStorage();
 
+  TextEditingController _usernameController = TextEditingController();
+  TextEditingController _emailController = TextEditingController();
+
   @override
   void initState()
   {
@@ -50,7 +54,19 @@ class _LoginState extends State<Login> {
 
   getData() async{
     await localStorage.addData("game_status", "login");
+    String username =await  localStorage.getData("username") ?? "";
+    String email = await localStorage.getData("email") ?? "";
+    if(username.isNotEmpty || email.isNotEmpty){
+      _usernameController.text =username;
+      _emailController.text=email;
 
+      context.read<LoginBloc>().add(UsernameChange(username: username));
+      context.read<LoginBloc>().add(EmailChange(email: email));
+
+    }
+    setState(() {
+
+    });
   }
 
   @override
@@ -78,7 +94,11 @@ class _LoginState extends State<Login> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
 
-                    SvgPicture.asset(AppImages.hfmgame,
+                    // SvgPicture.asset(AppImages.hfmgame,
+                    //   height: MediaQuery.of(context).size.height *.2,
+                    //     fit: BoxFit.scaleDown,
+                    // ),
+                    Image.asset(AppImages.logo,
                       height: MediaQuery.of(context).size.height *.2,
                     ),
 
@@ -97,6 +117,7 @@ class _LoginState extends State<Login> {
                           const SizedBox(width: 10,),
                           Expanded(
                             child: TextFormField(
+                              controller: _usernameController,
                               decoration: InputDecoration(
                                   hintText: "Username",
                                   border: InputBorder.none,
@@ -137,6 +158,8 @@ class _LoginState extends State<Login> {
                           const SizedBox(width: 10,),
                           Expanded(
                             child: TextFormField(
+                              controller: _emailController,
+
                               decoration: InputDecoration(
                                 hintText: "Email",
                                 border: InputBorder.none,
@@ -261,6 +284,10 @@ class _LoginState extends State<Login> {
                           showToast("Please enter valid email");
 
                         }else{
+                          LocalStorage localStorage = LocalStorage();
+                          localStorage.addData("username", state.username);
+                          localStorage.addData("email", state.email);
+
                           context.read<LoginBloc>().add(SubmitButton());
                         }
 

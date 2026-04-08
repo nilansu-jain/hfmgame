@@ -17,7 +17,7 @@ class FinalScoreModel {
       userId: json["user_id"],
       fullName: json["full_name"] ?? "",
       totalScore: json["totalScore"] ?? 0,
-      profilePhoto: json["profile_photo"] ?? 0,
+      profilePhoto: json["profile_photo"] ?? "",
 
     );
   }

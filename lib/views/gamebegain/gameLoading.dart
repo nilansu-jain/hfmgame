@@ -53,7 +53,11 @@ class _GameLoadingState extends State<GameLoading> {
 
       if(fireData != null){
         var clipscreen = fireData["globalClipScreenChange"];
+        var gameActivated = fireData["gameActivated"];
 
+        if(gameActivated == null){
+          logout(context);
+        }
         if(clipscreen != null){
           dbSub.cancel();  // 💥 stops listening instantly
           Navigator.of(context).pushNamedAndRemoveUntil(RoutesName.gameScreen, (route) => false,
