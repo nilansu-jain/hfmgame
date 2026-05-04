@@ -445,6 +445,12 @@ class _GameScreenState extends State<GameScreen> {
             ),),
           )
         ],
+        leading:  IconButton(onPressed: (){
+
+          logout(context);
+
+        },
+            icon: Icon(Icons.logout)),
       ),
       body: BlocListener<EventBloc, EventState>(
         listener: (context, state) {

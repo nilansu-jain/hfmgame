@@ -1,7 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:gaanap_admin_new/models/get_clip_info_model.dart';
-import 'package:gaanap_admin_new/models/get_game_data_model.dart';
 import 'package:gaanap_admin_new/services/storage/local_storage.dart';
 import 'package:gaanap_admin_new/utils/enums.dart';
 
@@ -30,7 +29,14 @@ class EventBloc extends Bloc<EventEvent, EventState> {
     };
     await eventRepository.joinEvent( data).then((value) async{
       if(value.status?.contains('error') ?? false){
-        emit(state.copyWith(apiStatus: EventStatus.error, message: value.message));
+        if(value.message?.toLowerCase().contains("already joined") ?? false){
+          LocalStorage localStorage = LocalStorage();
+          await localStorage.addData("game_status", "joined");
+          emit(state.copyWith(apiStatus: EventStatus.completed, message: value.message));
+
+        }else{
+          emit(state.copyWith(apiStatus: EventStatus.error, message: value.message));
+        }
 
       }else{
         LocalStorage localStorage = LocalStorage();

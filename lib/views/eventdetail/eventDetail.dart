@@ -158,14 +158,12 @@ class _EventDetailsState extends State<EventDetails> {
           fontWeight: FontWeight.bold
         ),)),
         actions: [
-          IconButton(onPressed: (){
+              IconButton(onPressed: (){
 
-            logout(context);
-
-          },
-              icon: Icon(Icons.logout)),
+                logout(context);
+              },
+                  icon: Icon(Icons.logout)),
         ],
-
       ),
       body: Container(
         height: MediaQuery.of(context).size.height,
@@ -319,7 +317,7 @@ class _EventDetailsState extends State<EventDetails> {
                 child: Container(
                   width: MediaQuery.of(context).size.width,
                   height: 50,
-                  margin: EdgeInsets.symmetric(vertical: 10,horizontal: 10),
+                  margin: EdgeInsets.symmetric(vertical: 30,horizontal: 10),
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     color: isActive ? AppColors.primaryColor : AppColors.lightGrey,
