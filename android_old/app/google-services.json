@@ -1,0 +1,163 @@
+{
+  "project_info": {
+    "project_number": "716936334541",
+    "firebase_url": "https://gaanap-live-10003.firebaseio.com",
+    "project_id": "gaanap-live-10003",
+    "storage_bucket": "gaanap-live-10003.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:716936334541:android:fb2c3fe85e51de44c52d84",
+        "android_client_info": {
+          "package_name": "com.gaanap"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "716936334541-684gs5n3d615d63cd3hfjq348m6nrjpg.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.gaanap",
+            "certificate_hash": "2319a9574b728afe93f0c48b760978aa5aa900dd"
+          }
+        },
+        {
+          "client_id": "716936334541-ljdrs4ekb98a6p4op90ss7k1i76655ml.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.gaanap",
+            "certificate_hash": "f406b93fa8d1bdaa1186251bc2d284e0a7c1fed0"
+          }
+        },
+        {
+          "client_id": "716936334541-u6bfbjo9vvcpghsipg32d9sf9g63sndg.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.gaanap",
+            "certificate_hash": "f5254003d609f0108a9bd2556b7d505edf4e9add"
+          }
+        },
+        {
+          "client_id": "716936334541-qchimpp14rb3c9tciuu9hh1o6nte1rb4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDdcAU57XXVQjA7USRXQVN_FGPqctwmT2w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "716936334541-qchimpp14rb3c9tciuu9hh1o6nte1rb4.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "716936334541-2i55551sruh0kjs4e6p80pms7nbha5c4.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.gaanap.gaanapahechaana",
+                "app_store_id": "1041920365"
+              }
+            }
+          ]
+        }
+      },
+      "admob_app_id": "ca-app-pub-9078116005265270~1161773350"
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:716936334541:android:c85b406297817167c52d84",
+        "android_client_info": {
+          "package_name": "com.gaanap.debug"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "716936334541-hjlh35pv3i454j695mn571k05eadoq9i.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.gaanap.debug",
+            "certificate_hash": "f5254003d609f0108a9bd2556b7d505edf4e9add"
+          }
+        },
+        {
+          "client_id": "716936334541-tltn9p59q3ksdm37kj357r7mmh1pcldl.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.gaanap.debug",
+            "certificate_hash": "2319a9574b728afe93f0c48b760978aa5aa900dd"
+          }
+        },
+        {
+          "client_id": "716936334541-qchimpp14rb3c9tciuu9hh1o6nte1rb4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDdcAU57XXVQjA7USRXQVN_FGPqctwmT2w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "716936334541-qchimpp14rb3c9tciuu9hh1o6nte1rb4.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "716936334541-2i55551sruh0kjs4e6p80pms7nbha5c4.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.gaanap.gaanapahechaana",
+                "app_store_id": "1041920365"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:716936334541:android:4f99e4476ee1754cc52d84",
+        "android_client_info": {
+          "package_name": "com.hfmgame"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "716936334541-qchimpp14rb3c9tciuu9hh1o6nte1rb4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDdcAU57XXVQjA7USRXQVN_FGPqctwmT2w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "716936334541-qchimpp14rb3c9tciuu9hh1o6nte1rb4.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "716936334541-2i55551sruh0kjs4e6p80pms7nbha5c4.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.gaanap.gaanapahechaana",
+                "app_store_id": "1041920365"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
