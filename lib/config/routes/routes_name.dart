@@ -1,5 +1,4 @@
-class RoutesName{
-
+class RoutesName {
   static const String splashScreen = "splash_screen";
   static const String loginScreen = "login_screen";
   static const String homeScreen = "home_screen";
@@ -9,10 +8,5 @@ class RoutesName{
   static const String gameScreen = "gameScreen";
   static const String gameOver = "gameOver";
   static const String finalScorecard = "finalScorecard";
-
-
-
-
-
-
+  static const String radioPlaylistScreen = "radioPlaylistScreen";
 }

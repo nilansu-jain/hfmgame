@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:gaanap_admin_new/models/user/user_model.dart';
 
 import '../../config/routes/routes_name.dart';
 import '../session_controller/session_controller.dart';
@@ -12,8 +13,20 @@ class SplashServices{
     SessionController().getUserPreference().then((value){
       debugPrint("${SessionController().isLogin}");
       if(SessionController().isLogin ?? false){
-        Timer(Duration(seconds: 3), () =>
-            Navigator.pushNamedAndRemoveUntil(context, RoutesName.eventDetailScreen, (route) => false));
+        UserModel userModel= SessionController().userModel;
+        String game_code = userModel.user?.gameCode ?? "";
+
+        if(game_code.toLowerCase() == 'radio'){
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            RoutesName.radioPlaylistScreen,
+                (route) => false,
+          );
+        }else{
+          Timer(Duration(seconds: 3), () =>
+              Navigator.pushNamedAndRemoveUntil(context, RoutesName.eventDetailScreen, (route) => false));
+        }
+
       }else{
         Timer(Duration(seconds: 3), () =>
             Navigator.pushNamedAndRemoveUntil(context, RoutesName.loginScreen, (route) => false));

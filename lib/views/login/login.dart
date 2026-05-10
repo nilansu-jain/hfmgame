@@ -1,4 +1,3 @@
-
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
@@ -43,8 +42,7 @@ class _LoginState extends State<Login> {
   TextEditingController _emailController = TextEditingController();
 
   @override
-  void initState()
-  {
+  void initState() {
     // TODO: implement initState
     super.initState();
     // WakelockPlus.disable();
@@ -52,21 +50,18 @@ class _LoginState extends State<Login> {
     _loginBloc = LoginBloc(loginRepository: getit());
   }
 
-  getData() async{
+  getData() async {
     await localStorage.addData("game_status", "login");
-    String username =await  localStorage.getData("username") ?? "";
+    String username = await localStorage.getData("username") ?? "";
     String email = await localStorage.getData("email") ?? "";
-    if(username.isNotEmpty || email.isNotEmpty){
-      _usernameController.text =username;
-      _emailController.text=email;
+    if (username.isNotEmpty || email.isNotEmpty) {
+      _usernameController.text = username;
+      _emailController.text = email;
 
       context.read<LoginBloc>().add(UsernameChange(username: username));
       context.read<LoginBloc>().add(EmailChange(email: email));
-
     }
-    setState(() {
-
-    });
+    setState(() {});
   }
 
   @override
@@ -93,34 +88,37 @@ class _LoginState extends State<Login> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-
                     // SvgPicture.asset(AppImages.hfmgame,
                     //   height: MediaQuery.of(context).size.height *.2,
                     //     fit: BoxFit.scaleDown,
                     // ),
-                    Image.asset(AppImages.logo,
-                      height: MediaQuery.of(context).size.height *.2,
+                    Image.asset(
+                      AppImages.logo,
+                      height: MediaQuery.of(context).size.height * .2,
                     ),
 
-                    const SizedBox(height: 50,),
+                    const SizedBox(
+                      height: 50,
+                    ),
 
                     Container(
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: AppColors.white,
-                        border: Border.all(color: Colors.black)
-                      ),
+                          borderRadius: BorderRadius.circular(10),
+                          color: AppColors.white,
+                          border: Border.all(color: Colors.black)),
                       padding: EdgeInsets.symmetric(horizontal: 10),
                       child: Row(
                         children: [
                           Icon(Icons.account_circle_sharp),
-                          const SizedBox(width: 10,),
+                          const SizedBox(
+                            width: 10,
+                          ),
                           Expanded(
                             child: TextFormField(
                               controller: _usernameController,
                               decoration: InputDecoration(
-                                  hintText: "Username",
-                                  border: InputBorder.none,
+                                hintText: "Username",
+                                border: InputBorder.none,
                               ),
                               keyboardType: TextInputType.name,
                               textInputAction: TextInputAction.next,
@@ -128,7 +126,9 @@ class _LoginState extends State<Login> {
                               onChanged: (value) {
                                 print("$value");
 
-                                context.read<LoginBloc>().add(UsernameChange(username: value));
+                                context
+                                    .read<LoginBloc>()
+                                    .add(UsernameChange(username: value));
                               },
                               onFieldSubmitted: (value) {},
                               validator: (value) {
@@ -143,23 +143,25 @@ class _LoginState extends State<Login> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 20,),
+                    const SizedBox(
+                      height: 20,
+                    ),
 
                     Container(
                       decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10),
                           color: AppColors.white,
-                          border: Border.all(color: Colors.black)
-                      ),
+                          border: Border.all(color: Colors.black)),
                       padding: EdgeInsets.symmetric(horizontal: 10),
                       child: Row(
                         children: [
                           Icon(Icons.email),
-                          const SizedBox(width: 10,),
+                          const SizedBox(
+                            width: 10,
+                          ),
                           Expanded(
                             child: TextFormField(
                               controller: _emailController,
-
                               decoration: InputDecoration(
                                 hintText: "Email",
                                 border: InputBorder.none,
@@ -168,7 +170,9 @@ class _LoginState extends State<Login> {
                               textInputAction: TextInputAction.next,
                               focusNode: emailFocusnode,
                               onChanged: (value) {
-                                context.read<LoginBloc>().add(EmailChange(email: value));
+                                context
+                                    .read<LoginBloc>()
+                                    .add(EmailChange(email: value));
                               },
                               onFieldSubmitted: (value) {},
                               validator: (value) {
@@ -184,20 +188,22 @@ class _LoginState extends State<Login> {
                       ),
                     ),
 
-
-                    const SizedBox(height: 20,),
+                    const SizedBox(
+                      height: 20,
+                    ),
 
                     Container(
                       decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10),
                           color: AppColors.white,
-                          border: Border.all(color: Colors.black)
-                      ),
+                          border: Border.all(color: Colors.black)),
                       padding: EdgeInsets.symmetric(horizontal: 10),
                       child: Row(
                         children: [
                           Icon(Icons.lock_outline),
-                          const SizedBox(width: 10,),
+                          const SizedBox(
+                            width: 10,
+                          ),
                           Expanded(
                             child: TextFormField(
                               decoration: InputDecoration(
@@ -209,7 +215,9 @@ class _LoginState extends State<Login> {
                               focusNode: gameCodeFocusnode,
                               onChanged: (value) {
                                 print("$value");
-                                context.read<LoginBloc>().add(GameCodeChange(gameCode: value));
+                                context
+                                    .read<LoginBloc>()
+                                    .add(GameCodeChange(gameCode: value));
                               },
                               onFieldSubmitted: (value) {},
                               validator: (value) {
@@ -225,27 +233,32 @@ class _LoginState extends State<Login> {
                       ),
                     ),
 
-                    const SizedBox(height: 20,),
+                    const SizedBox(
+                      height: 20,
+                    ),
 
                     InkWell(
-                      onTap:(){
+                      onTap: () {
                         showImageSource(context);
                       },
                       child: Container(
                         decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(10),
                             color: AppColors.white,
-                            border: Border.all(color: Colors.black)
-                        ),
+                            border: Border.all(color: Colors.black)),
                         padding: EdgeInsets.symmetric(horizontal: 10),
                         child: Row(
                           children: [
                             Icon(Icons.account_circle_sharp),
-                            const SizedBox(width: 10,),
+                            const SizedBox(
+                              width: 10,
+                            ),
                             Expanded(
                               child: TextFormField(
                                 decoration: InputDecoration(
-                                  hintText: _image?.path != null ? _image!.path.split('/').last : "Upload Photo (Optional)",
+                                  hintText: _image?.path != null
+                                      ? _image!.path.split('/').last
+                                      : "Upload Photo (Optional)",
                                   border: InputBorder.none,
                                 ),
                                 textInputAction: TextInputAction.done,
@@ -257,65 +270,78 @@ class _LoginState extends State<Login> {
                       ),
                     ),
 
-                    const SizedBox(height: 20,),
-
+                    const SizedBox(
+                      height: 20,
+                    ),
 
                     BlocConsumer<LoginBloc, LoginState>(
-                      listener: (context,state){
-                        if(state.loginApiStatus == LoginApiStatus.success){
+                      listener: (context, state) {
+                        if (state.loginApiStatus == LoginApiStatus.success) {
                           showToast(state.message);
-                          Navigator.pushNamedAndRemoveUntil(context, RoutesName.eventDetailScreen, (route) => false);
-
+                          if (state.gameCode.trim().toLowerCase() ==
+                              "radio" &&
+                              Platform.isIOS) {
+                            Navigator.pushNamedAndRemoveUntil(
+                              context,
+                              RoutesName.radioPlaylistScreen,
+                                  (route) => false,
+                            );
+                            return;
+                          }
+                          Navigator.pushNamedAndRemoveUntil(context,
+                              RoutesName.eventDetailScreen, (route) => false);
                         }
-                        if(state.loginApiStatus == LoginApiStatus.error){
+                        if (state.loginApiStatus == LoginApiStatus.error) {
                           showToast(state.message);
-
                         }
                       },
                       builder: (context, state) {
                         print(state);
                         return InkWell(
-                      onTap: (){
-                        if(state.username.isEmpty){
-                          showToast("Please enter username");
-                        }else if(state.gameCode.isEmpty){
-                          showToast("Please enter Game Code");
-                        }else if(state.email.isEmpty || !isValidEmail(state.email)){
-                          showToast("Please enter valid email");
+                          onTap: () {
+                            if (state.username.isEmpty) {
+                              showToast("Please enter username");
+                            } else if (state.gameCode.isEmpty) {
+                              showToast("Please enter Game Code");
+                            } else if (state.email.isEmpty ||
+                                !isValidEmail(state.email)) {
+                              showToast("Please enter valid email");
+                            } else {
+                              LocalStorage localStorage = LocalStorage();
+                              localStorage.addData("username", state.username);
+                              localStorage.addData("email", state.email);
 
-                        }else{
-                          LocalStorage localStorage = LocalStorage();
-                          localStorage.addData("username", state.username);
-                          localStorage.addData("email", state.email);
 
-                          context.read<LoginBloc>().add(SubmitButton());
-                        }
 
-                      },
-                      child: Container(
-                        width: MediaQuery.of(context).size.width,
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryColor,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: Colors.white,width: 2)
-                        ),
-                        padding: EdgeInsets.symmetric(vertical: 10),
-                        child: state.loginApiStatus == LoginApiStatus.loading
-                        ? Center(child: CircularProgressIndicator(color: AppColors.white,))
-                        : Text(
-                          'SUBMIT',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: AppColors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold
+                              context.read<LoginBloc>().add(SubmitButton());
+                            }
+                          },
+                          child: Container(
+                            width: MediaQuery.of(context).size.width,
+                            decoration: BoxDecoration(
+                                color: AppColors.primaryColor,
+                                borderRadius: BorderRadius.circular(10),
+                                border:
+                                    Border.all(color: Colors.white, width: 2)),
+                            padding: EdgeInsets.symmetric(vertical: 10),
+                            child:
+                                state.loginApiStatus == LoginApiStatus.loading
+                                    ? Center(
+                                        child: CircularProgressIndicator(
+                                        color: AppColors.white,
+                                      ))
+                                    : Text(
+                                        'SUBMIT',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                            color: AppColors.white,
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold),
+                                      ),
                           ),
-                        ),
-                      ),
-                    );
-          },
-                )
-
+                        );
+                      },
+                    )
                   ],
                 ),
               )),
@@ -362,9 +388,9 @@ class _LoginState extends State<Login> {
         _image = File(pickedFile.path);
       });
       context.read<LoginBloc>().add(UploadImageEvent(image: _image!));
-
     }
   }
+
   bool isValidEmail(String email) {
     return RegExp(r"^[\w\.-]+@[\w\.-]+\.\w{2,}$").hasMatch(email);
   }
