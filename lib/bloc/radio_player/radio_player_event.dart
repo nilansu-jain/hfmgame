@@ -67,6 +67,15 @@ class RadioSearchSongSelected extends RadioPlayerEvent {
   List<Object> get props => [songIndex];
 }
 
+class RadioSongAddToQueueRequested extends RadioPlayerEvent {
+  final RadioSong song;
+
+  const RadioSongAddToQueueRequested(this.song);
+
+  @override
+  List<Object> get props => [song];
+}
+
 class RadioPlaylistSelected extends RadioPlayerEvent {
   final int playlistIndex;
 

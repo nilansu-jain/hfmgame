@@ -8,6 +8,7 @@ import 'package:gaanap_admin_new/views/radio/radio_player_screen.dart';
 import 'package:gaanap_admin_new/views/radio/radio_playlist_songs_screen.dart';
 import 'package:gaanap_admin_new/views/radio/radio_theme.dart';
 import 'package:gaanap_admin_new/views/radio/widgets/radio_mini_player.dart';
+import 'package:gaanap_admin_new/views/radio/widgets/radio_song_options_sheet.dart';
 
 class RadioPlaylistScreen extends StatelessWidget {
   const RadioPlaylistScreen({super.key});
@@ -201,8 +202,7 @@ class _SongSearchFieldState extends State<_SongSearchField> {
     'genre1': 'Genre',
   };
 
-  final TextEditingController _searchController =
-  TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void dispose() {
@@ -214,7 +214,7 @@ class _SongSearchFieldState extends State<_SongSearchField> {
   Widget build(BuildContext context) {
     return BlocBuilder<RadioPlayerBloc, RadioPlayerState>(
       buildWhen: (previous, current) =>
-      previous.playlistSearchBy != current.playlistSearchBy,
+          previous.playlistSearchBy != current.playlistSearchBy,
       builder: (context, state) {
         return Container(
           height: 46,
@@ -247,27 +247,27 @@ class _SongSearchFieldState extends State<_SongSearchField> {
                     items: _searchOptions.entries
                         .map(
                           (entry) => DropdownMenuItem<String>(
-                        value: entry.key,
-                        child: Text(
-                          entry.value,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    )
+                            value: entry.key,
+                            child: Text(
+                              entry.value,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        )
                         .toList(),
                     onChanged: (value) {
                       _searchController.clear();
 
                       context.read<RadioPlayerBloc>().add(
-                        RadioPlaylistSongSearchChanged(""),
-                      );
+                            const RadioPlaylistSongSearchChanged(""),
+                          );
 
                       if (value == null) return;
 
                       context.read<RadioPlayerBloc>().add(
-                        RadioPlaylistSearchByChanged(value),
-                      );
+                            RadioPlaylistSearchByChanged(value),
+                          );
                     },
                   ),
                 ),
@@ -275,10 +275,8 @@ class _SongSearchFieldState extends State<_SongSearchField> {
               Container(
                 width: 1,
                 height: 24,
-                margin:
-                const EdgeInsets.symmetric(horizontal: 10),
-                color: RadioThemeColors.navy
-                    .withValues(alpha: 0.18),
+                margin: const EdgeInsets.symmetric(horizontal: 10),
+                color: RadioThemeColors.navy.withValues(alpha: 0.18),
               ),
               const Icon(
                 Icons.search_rounded,
@@ -291,8 +289,8 @@ class _SongSearchFieldState extends State<_SongSearchField> {
                   controller: _searchController,
                   onChanged: (value) {
                     context.read<RadioPlayerBloc>().add(
-                      RadioPlaylistSongSearchChanged(value),
-                    );
+                          RadioPlaylistSongSearchChanged(value),
+                        );
                   },
                   style: const TextStyle(
                     color: RadioThemeColors.navy,
@@ -316,6 +314,7 @@ class _SongSearchFieldState extends State<_SongSearchField> {
     );
   }
 }
+
 class _SearchSongResults extends StatelessWidget {
   final RadioPlayerState state;
 
@@ -381,6 +380,7 @@ class _SearchSongResults extends StatelessWidget {
               ),
             );
           },
+          onMoreTap: () => showRadioSongOptionsSheet(context, song),
         );
       },
     );
@@ -459,10 +459,12 @@ class _RadioHeader extends StatelessWidget {
 class _SearchSongTile extends StatelessWidget {
   final RadioSong song;
   final VoidCallback onTap;
+  final VoidCallback onMoreTap;
 
   const _SearchSongTile({
     required this.song,
     required this.onTap,
+    required this.onMoreTap,
   });
 
   @override
@@ -522,7 +524,14 @@ class _SearchSongTile extends StatelessWidget {
                     fontSize: 12,
                   ),
                 ),
-              const SizedBox(width: 16),
+              IconButton(
+                onPressed: onMoreTap,
+                icon: const Icon(
+                  Icons.more_vert_rounded,
+                  color: RadioThemeColors.navy,
+                ),
+              ),
+              const SizedBox(width: 6),
             ],
           ),
         ),

@@ -8,6 +8,10 @@ import Flutter
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
     GeneratedPluginRegistrant.register(with: self)
+    registrar(forPlugin: "AirPlayRoutePicker")?.register(
+      AirPlayRoutePickerFactory(),
+      withId: "hfmgame/airplay_route_picker"
+    )
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 }

@@ -4,6 +4,7 @@ import 'package:gaanap_admin_new/bloc/radio_player/radio_player_bloc.dart';
 import 'package:gaanap_admin_new/views/radio/radio_player_screen.dart';
 import 'package:gaanap_admin_new/views/radio/radio_theme.dart';
 import 'package:gaanap_admin_new/views/radio/widgets/radio_mini_player.dart';
+import 'package:gaanap_admin_new/views/radio/widgets/radio_song_options_sheet.dart';
 
 class RadioPlaylistSongsScreen extends StatelessWidget {
   const RadioPlaylistSongsScreen({super.key});
@@ -85,6 +86,10 @@ class RadioPlaylistSongsScreen extends StatelessWidget {
                             ),
                           );
                         },
+                        onMoreTap: () => showRadioSongOptionsSheet(
+                          context,
+                          song,
+                        ),
                       );
                     },
                   );
@@ -315,10 +320,12 @@ class _SearchBox extends StatelessWidget {
 class _SongTile extends StatelessWidget {
   final RadioSong song;
   final VoidCallback onTap;
+  final VoidCallback onMoreTap;
 
   const _SongTile({
     required this.song,
     required this.onTap,
+    required this.onMoreTap,
   });
 
   @override
@@ -378,7 +385,14 @@ class _SongTile extends StatelessWidget {
                   fontSize: 12,
                 ),
               ),
-              const SizedBox(width: 16),
+              IconButton(
+                onPressed: onMoreTap,
+                icon: const Icon(
+                  Icons.more_vert_rounded,
+                  color: RadioThemeColors.navy,
+                ),
+              ),
+              const SizedBox(width: 6),
             ],
           ),
         ),

@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:audio_session/audio_session.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:gaanap_admin_new/models/radio/radio_playlist_model.dart';
 import 'package:gaanap_admin_new/repository/radio/radio_repository.dart';
 import 'package:just_audio/just_audio.dart';
@@ -18,6 +20,7 @@ class RadioPlayerBloc extends Bloc<RadioPlayerEvent, RadioPlayerState> {
   StreamSubscription<Duration>? _positionSubscription;
   Timer? _playlistSearchDebounce;
   int _playlistSearchRequestId = 0;
+  bool _audioConfigured = false;
 
   RadioPlayerBloc({required this.radioRepository})
       : super(RadioPlayerState.initial()) {
@@ -33,6 +36,7 @@ class RadioPlayerBloc extends Bloc<RadioPlayerEvent, RadioPlayerState> {
     on<RadioSongSearchChanged>(_onSongSearchChanged);
     on<RadioSongSelected>(_onSongSelected);
     on<RadioSearchSongSelected>(_onSearchSongSelected);
+    on<RadioSongAddToQueueRequested>(_onSongAddToQueueRequested);
     on<RadioShuffleRequested>(_onShuffleRequested);
     on<RadioPlayPauseRequested>(_onPlayPauseRequested);
     on<RadioNextRequested>(_onNextRequested);
@@ -48,6 +52,7 @@ class RadioPlayerBloc extends Bloc<RadioPlayerEvent, RadioPlayerState> {
     RadioStarted event,
     Emitter<RadioPlayerState> emit,
   ) async {
+    await _configureAudioSession();
     _playerStateSubscription ??=
         _audioPlayer.playerStateStream.listen((playerState) {
       add(_RadioPlaybackChanged(playerState.playing));
@@ -364,6 +369,32 @@ class RadioPlayerBloc extends Bloc<RadioPlayerEvent, RadioPlayerState> {
     await _audioPlayer.play();
   }
 
+  void _onSongAddToQueueRequested(
+    RadioSongAddToQueueRequested event,
+    Emitter<RadioPlayerState> emit,
+  ) {
+    final queuedSongs = List<RadioSong>.from(state.songs);
+    final hasCurrentSong = state.hasSelectedSong && queuedSongs.isNotEmpty;
+    final insertIndex = hasCurrentSong
+        ? min(state.selectedSongIndex + 1, queuedSongs.length)
+        : queuedSongs.length;
+    final playedIndexes = state.playedSongIndexes
+        .map((index) => index >= insertIndex ? index + 1 : index)
+        .toSet();
+
+    queuedSongs.insert(insertIndex, event.song);
+
+    emit(
+      state.copyWith(
+        songs: queuedSongs,
+        selectedSongIndex: state.hasSelectedSong ? state.selectedSongIndex : 0,
+        playedSongIndexes: playedIndexes,
+        songsStatus: RadioSongsStatus.completed,
+        songsMessage: '',
+      ),
+    );
+  }
+
   Future<void> _onShuffleRequested(
     RadioShuffleRequested event,
     Emitter<RadioPlayerState> emit,
@@ -530,6 +561,47 @@ class RadioPlayerBloc extends Bloc<RadioPlayerEvent, RadioPlayerState> {
       return;
     }
     await _audioPlayer.setAsset(state.currentSong.audioAsset);
+  }
+
+  // Future<void> _configureAudioSession() async {
+  //   if (_audioConfigured) return;
+  //
+  //   final session = await AudioSession.instance;
+  //
+  //   await session.configure(
+  //     const AudioSessionConfiguration(
+  //       avAudioSessionCategory: AVAudioSessionCategory.playback,
+  //       avAudioSessionCategoryOptions:
+  //       AVAudioSessionCategoryOptions.allowAirPlay,
+  //       avAudioSessionMode: AVAudioSessionMode.defaultMode,
+  //       androidAudioAttributes: AndroidAudioAttributes(
+  //         contentType: AndroidAudioContentType.music,
+  //         usage: AndroidAudioUsage.media,
+  //       ),
+  //       androidAudioFocusGainType:
+  //       AndroidAudioFocusGainType.gain,
+  //       androidWillPauseWhenDucked: false,
+  //     ),
+  //   );
+  //
+  //   _audioConfigured = true;
+  //
+  // }
+
+  Future<void> _configureAudioSession() async {
+    if (_audioConfigured) return;
+
+    try {
+      final session = await AudioSession.instance;
+
+      await session.configure(
+        const AudioSessionConfiguration.music(),
+      );
+
+      _audioConfigured = true;
+    } catch (e) {
+      debugPrint('Audio session config failed: $e');
+    }
   }
 
   @override

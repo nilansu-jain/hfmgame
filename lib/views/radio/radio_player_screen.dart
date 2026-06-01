@@ -4,6 +4,7 @@ import 'package:gaanap_admin_new/bloc/radio_player/radio_player_bloc.dart';
 import 'package:gaanap_admin_new/res/color/colors.dart';
 import 'package:gaanap_admin_new/res/images/images.dart';
 import 'package:gaanap_admin_new/views/radio/radio_theme.dart';
+import 'package:gaanap_admin_new/views/radio/widgets/airplay_route_picker.dart';
 
 class RadioPlayerScreen extends StatelessWidget {
   const RadioPlayerScreen({super.key});
@@ -63,9 +64,8 @@ class RadioPlayerScreen extends StatelessWidget {
                       SliderTheme(
                         data: SliderTheme.of(context).copyWith(
                           trackHeight: 2,
-                          thumbShape: const RoundSliderOverlayShape(
-                            overlayRadius: 4
-                          ),
+                          thumbShape:
+                              const RoundSliderOverlayShape(overlayRadius: 4),
                           overlayShape: const RoundSliderOverlayShape(
                             overlayRadius: 14,
                           ),
@@ -142,7 +142,8 @@ class RadioPlayerScreen extends StatelessWidget {
                         height: 72,
                         decoration: const BoxDecoration(
                           color: RadioThemeColors.navy,
-                          image: DecorationImage(image: AssetImage(AppImages.playBackground)),
+                          image: DecorationImage(
+                              image: AssetImage(AppImages.playBackground)),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
@@ -208,7 +209,10 @@ class _PlayerHeader extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
           ),
-          const SizedBox(width: 60),
+          const SizedBox(
+            width: 60,
+            child: Center(child: AirPlayRoutePicker()),
+          ),
         ],
       ),
     );
