@@ -478,7 +478,26 @@ class RadioPlayerBloc extends Bloc<RadioPlayerEvent, RadioPlayerState> {
     RadioSeekRequested event,
     Emitter<RadioPlayerState> emit,
   ) async {
-    await _audioPlayer.seek(event.position);
+    if (!state.hasSelectedSong || state.songs.isEmpty) {
+      return;
+    }
+
+    final duration = _audioPlayer.duration ?? state.duration;
+    if (duration <= Duration.zero) {
+      return;
+    }
+
+    final safeEndPosition = duration > const Duration(milliseconds: 500)
+        ? duration - const Duration(milliseconds: 500)
+        : Duration.zero;
+    final requestedPosition =
+        event.position < Duration.zero ? Duration.zero : event.position;
+    final seekPosition = requestedPosition > safeEndPosition
+        ? safeEndPosition
+        : requestedPosition;
+
+    emit(state.copyWith(position: seekPosition));
+    await _audioPlayer.seek(seekPosition);
   }
 
   void _onPlaybackChanged(

@@ -9,6 +9,7 @@ import 'package:gaanap_admin_new/views/radio/widgets/radio_song_options_sheet.da
 class RadioPlaylistSongsScreen extends StatelessWidget {
   const RadioPlaylistSongsScreen({super.key});
 
+  final List<RadioSong> queueSongs;
   @override
   Widget build(BuildContext context) {
     return Scaffold(

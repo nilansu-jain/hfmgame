@@ -604,11 +604,13 @@ class _GameScreenState extends State<GameScreen> {
                                       border: Border.all(
                                         width: performAnswer  && (((currentClip.options?[0].clipCorrectOption.toString().contains("W") ?? false) && selectedOption == 1) || ((currentClip.options?[0].clipCorrectOption.toString().contains("C") ?? false)&& selectedOption == 1))
                                             ? 4 :0,
-                                        color: performAnswer  && selectedOption == 1 && (currentClip.options?[0].clipCorrectOption.toString().contains("C") ?? false)
+                                        color: showResult && performAnswer  && selectedOption == 1 && (currentClip.options?[0].clipCorrectOption.toString().contains("C") ?? false)
                                           ? AppColors.rightAnswerColor
-                                            : performAnswer  && selectedOption == 1 && (currentClip.options?[0].clipCorrectOption.toString().contains("W") ?? false)
+                                            : showResult && performAnswer  && selectedOption == 1 && (currentClip.options?[0].clipCorrectOption.toString().contains("W") ?? false)
                                           ? AppColors.wrongAnswerColor
-                                            : Colors.white
+                                        :!showResult && performAnswer
+                                          ? AppColors.grey
+                                          : Colors.white
                                       )
                                     ),
                                     padding: EdgeInsets.symmetric(horizontal: 10,vertical: 10),
@@ -636,12 +638,12 @@ class _GameScreenState extends State<GameScreen> {
                                   ),
                                 ),
 
-                                performAnswer && selectedOption == 1 && (currentClip.options?[0].clipCorrectOption.toString().contains("W") ?? false) ?
+                                showResult && performAnswer && selectedOption == 1 && (currentClip.options?[0].clipCorrectOption.toString().contains("W") ?? false) ?
                                 Image.asset(AppImages.wrong,
                                   width: 30,
                                   height: 30,) : Container(),
 
-                                performAnswer && selectedOption == 1 && (currentClip.options?[0].clipCorrectOption.toString().contains("C") ?? false) ?
+                                showResult &&  performAnswer && selectedOption == 1 && (currentClip.options?[0].clipCorrectOption.toString().contains("C") ?? false) ?
                                 Image.asset(AppImages.right,
                                   width: 30,
                                   height: 30,) : Container()
@@ -683,10 +685,12 @@ class _GameScreenState extends State<GameScreen> {
                                         border: Border.all(
                                             width: performAnswer  && (((currentClip.options?[1].clipCorrectOption.toString().contains("W") ?? false) && selectedOption == 2) || ((currentClip.options?[1].clipCorrectOption.toString().contains("C") ?? false) && selectedOption == 2))
                                                 ? 4 :0,
-                                            color: performAnswer  && selectedOption == 2 && (currentClip.options?[1].clipCorrectOption.toString().contains("C") ?? false)
+                                            color: showResult && performAnswer  && selectedOption == 2 && (currentClip.options?[1].clipCorrectOption.toString().contains("C") ?? false)
                                                 ? AppColors.rightAnswerColor
-                                                : performAnswer  && selectedOption == 2 && (currentClip.options?[1].clipCorrectOption.toString().contains("W") ?? false)
+                                                : showResult && performAnswer  && selectedOption == 2 && (currentClip.options?[1].clipCorrectOption.toString().contains("W") ?? false)
                                                 ? AppColors.wrongAnswerColor
+                                                :!showResult && performAnswer
+                                                ? AppColors.grey
                                                 : Colors.white
                                         )
 
@@ -716,12 +720,12 @@ class _GameScreenState extends State<GameScreen> {
                                     ),
                                   ),
                                 ),
-                              performAnswer && selectedOption == 2 && (currentClip.options?[1].clipCorrectOption.toString().contains("W") ?? false) ?
+                              showResult && performAnswer && selectedOption == 2 && (currentClip.options?[1].clipCorrectOption.toString().contains("W") ?? false) ?
                               Image.asset(AppImages.wrong,
                               width: 30,
                               height: 30,) : Container(),
 
-                                performAnswer && selectedOption == 2 && (currentClip.options?[1].clipCorrectOption.toString().contains("C") ?? false)  ?
+                                showResult &&  performAnswer && selectedOption == 2 && (currentClip.options?[1].clipCorrectOption.toString().contains("C") ?? false)  ?
                                 Image.asset(AppImages.right,
                                   width: 30,
                                   height: 30,) : Container()
@@ -770,10 +774,12 @@ class _GameScreenState extends State<GameScreen> {
                                         border: Border.all(
                                             width: performAnswer  && (((currentClip.options?[2].clipCorrectOption.toString().contains("W") ?? false) && selectedOption == 3) || ((currentClip.options?[2].clipCorrectOption.toString().contains("C") ?? false) && selectedOption == 3))
                                                 ? 4 :0,
-                                            color: performAnswer  && selectedOption == 3 && (currentClip.options?[2].clipCorrectOption.toString().contains("C") ?? false)
+                                            color: showResult && performAnswer  && selectedOption == 3 && (currentClip.options?[2].clipCorrectOption.toString().contains("C") ?? false)
                                                 ? AppColors.rightAnswerColor
-                                                : performAnswer  && selectedOption == 3 && (currentClip.options?[2].clipCorrectOption.toString().contains("W") ?? false)
+                                                : showResult && performAnswer  && selectedOption == 3 && (currentClip.options?[2].clipCorrectOption.toString().contains("W") ?? false)
                                                 ? AppColors.wrongAnswerColor
+                                                :!showResult && performAnswer
+                                                ? AppColors.grey
                                                 : Colors.white
                                         )
 
@@ -802,12 +808,12 @@ class _GameScreenState extends State<GameScreen> {
                                     ),
                                   ),
                                 ),
-                                performAnswer && selectedOption == 3 && (currentClip.options?[2].clipCorrectOption.toString().contains("W") ?? false) ?
+                                showResult && performAnswer && selectedOption == 3 && (currentClip.options?[2].clipCorrectOption.toString().contains("W") ?? false) ?
                                 Image.asset(AppImages.wrong,
                                   width: 30,
                                   height: 30,) : Container(),
 
-                                performAnswer && selectedOption == 3 && (currentClip.options?[2].clipCorrectOption.toString().contains("C") ?? false)  ?
+                                showResult && performAnswer && selectedOption == 3 && (currentClip.options?[2].clipCorrectOption.toString().contains("C") ?? false)  ?
                                 Image.asset(AppImages.right,
                                   width: 30,
                                   height: 30,) : Container()
@@ -850,10 +856,12 @@ class _GameScreenState extends State<GameScreen> {
                                         border: Border.all(
                                             width: performAnswer  && (((currentClip.options?[3].clipCorrectOption.toString().contains("W") ?? false) && selectedOption == 4) || ((currentClip.options?[3].clipCorrectOption.toString().contains("C") ?? false) && selectedOption == 4))
                                                 ? 4 :0,
-                                            color: performAnswer  && selectedOption == 4 && (currentClip.options?[3].clipCorrectOption.toString().contains("C") ?? false)
+                                            color: showResult &&  performAnswer  && selectedOption == 4 && (currentClip.options?[3].clipCorrectOption.toString().contains("C") ?? false)
                                                 ? AppColors.rightAnswerColor
-                                                : performAnswer  && selectedOption == 4 && (currentClip.options?[3].clipCorrectOption.toString().contains("W") ?? false)
+                                                : showResult && performAnswer  && selectedOption == 4 && (currentClip.options?[3].clipCorrectOption.toString().contains("W") ?? false)
                                                 ? AppColors.wrongAnswerColor
+                                                :!showResult && performAnswer
+                                                ? AppColors.grey
                                                 : Colors.white
                                         )
 
@@ -883,12 +891,12 @@ class _GameScreenState extends State<GameScreen> {
                                     ),
                                   ),
                                 ),
-                                performAnswer && selectedOption == 4 && (currentClip.options?[3].clipCorrectOption.toString().contains("W") ?? false) ?
+                                showResult && performAnswer && selectedOption == 4 && (currentClip.options?[3].clipCorrectOption.toString().contains("W") ?? false) ?
                                 Image.asset(AppImages.wrong,
                                   width: 30,
                                   height: 30,) : Container(),
 
-                                performAnswer && selectedOption == 4 && (currentClip.options?[3].clipCorrectOption.toString().contains("C") ?? false)  ?
+                                showResult && performAnswer && selectedOption == 4 && (currentClip.options?[3].clipCorrectOption.toString().contains("C") ?? false)  ?
                                 Image.asset(AppImages.right,
                                   width: 30,
                                   height: 30,) : Container()

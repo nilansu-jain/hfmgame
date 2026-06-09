@@ -282,7 +282,7 @@ class _EventDetailsState extends State<EventDetails> {
               ],
             )
               ,),
-            Spacer(),
+            // Spacer(),
             SafeArea(
               top: false,
               child: BlocConsumer<EventBloc, EventState>(

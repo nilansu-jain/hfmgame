@@ -6,8 +6,16 @@ import 'package:gaanap_admin_new/res/images/images.dart';
 import 'package:gaanap_admin_new/views/radio/radio_theme.dart';
 import 'package:gaanap_admin_new/views/radio/widgets/airplay_route_picker.dart';
 
-class RadioPlayerScreen extends StatelessWidget {
+class RadioPlayerScreen extends StatefulWidget {
   const RadioPlayerScreen({super.key});
+
+  @override
+  State<RadioPlayerScreen> createState() => _RadioPlayerScreenState();
+}
+
+class _RadioPlayerScreenState extends State<RadioPlayerScreen> {
+  bool _isSeeking = false;
+  Duration _seekPosition = Duration.zero;
 
   @override
   Widget build(BuildContext context) {
@@ -17,11 +25,14 @@ class RadioPlayerScreen extends StatelessWidget {
         child: BlocBuilder<RadioPlayerBloc, RadioPlayerState>(
           builder: (context, state) {
             final song = state.currentSong;
-            final maxSeconds = state.duration.inSeconds == 0
+            final maxMilliseconds = state.duration.inMilliseconds == 0
                 ? 1.0
-                : state.duration.inSeconds.toDouble();
-            final currentSeconds =
-                state.position.inSeconds.clamp(0, maxSeconds.toInt());
+                : state.duration.inMilliseconds.toDouble();
+            final displayPosition = _isSeeking ? _seekPosition : state.position;
+            final currentMilliseconds = displayPosition.inMilliseconds
+                .clamp(0, maxMilliseconds.toInt());
+            final canSeek =
+                state.hasSelectedSong && state.duration > Duration.zero;
 
             return Column(
               children: [
@@ -75,15 +86,42 @@ class RadioPlayerScreen extends StatelessWidget {
                         ),
                         child: Slider(
                           min: 0,
-                          max: maxSeconds,
-                          value: currentSeconds.toDouble(),
-                          onChanged: (value) {
-                            context.read<RadioPlayerBloc>().add(
-                                  RadioSeekRequested(
-                                    Duration(seconds: value.round()),
-                                  ),
-                                );
-                          },
+                          max: maxMilliseconds,
+                          value: currentMilliseconds.toDouble(),
+                          onChangeStart: canSeek
+                              ? (value) {
+                                  setState(() {
+                                    _isSeeking = true;
+                                    _seekPosition = Duration(
+                                      milliseconds: value.round(),
+                                    );
+                                  });
+                                }
+                              : null,
+                          onChanged: canSeek
+                              ? (value) {
+                                  setState(() {
+                                    _isSeeking = true;
+                                    _seekPosition = Duration(
+                                      milliseconds: value.round(),
+                                    );
+                                  });
+                                }
+                              : null,
+                          onChangeEnd: canSeek
+                              ? (value) {
+                                  final position = Duration(
+                                    milliseconds: value.round(),
+                                  );
+                                  setState(() {
+                                    _isSeeking = false;
+                                    _seekPosition = position;
+                                  });
+                                  context.read<RadioPlayerBloc>().add(
+                                        RadioSeekRequested(position),
+                                      );
+                                }
+                              : null,
                         ),
                       ),
                       Padding(
@@ -92,7 +130,7 @@ class RadioPlayerScreen extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              radioDurationLabel(state.position),
+                              radioDurationLabel(displayPosition),
                               style: const TextStyle(
                                 color: RadioThemeColors.navy,
                                 fontSize: 12,
