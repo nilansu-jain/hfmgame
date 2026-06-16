@@ -7,6 +7,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:gaanap_admin_new/models/radio/radio_playlist_model.dart';
 import 'package:gaanap_admin_new/repository/radio/radio_repository.dart';
+import 'package:gaanap_admin_new/services/storage/local_storage.dart';
 import 'package:just_audio/just_audio.dart';
 
 part 'radio_player_event.dart';
@@ -255,17 +256,25 @@ class RadioPlayerBloc extends Bloc<RadioPlayerEvent, RadioPlayerState> {
     RadioPlaylistSelected event,
     Emitter<RadioPlayerState> emit,
   ) async {
-    await _audioPlayer.stop();
+    final selectedPlaylist =
+    state.playlists[event.playlistIndex];
+
+    if (!state.isSearchPlayback &&
+        state.currentPlaylist.id == selectedPlaylist.id &&
+        state.songs.isNotEmpty) {
+      return;
+    }
+    // await _audioPlayer.stop();
     emit(
       state.copyWith(
         selectedPlaylistIndex: event.playlistIndex,
         songs: const [],
         selectedSongIndex: 0,
-        isPlaying: false,
-        hasSelectedSong: false,
+        // isPlaying: false,
+        // hasSelectedSong: false,
         playedSongIndexes: {},
-        duration: Duration.zero,
-        position: Duration.zero,
+        // duration: Duration.zero,
+        // position: Duration.zero,
         songsStatus: RadioSongsStatus.loading,
         songsMessage: '',
         songSearchQuery: '',
@@ -298,11 +307,41 @@ class RadioPlayerBloc extends Bloc<RadioPlayerEvent, RadioPlayerState> {
         );
         return;
       }
+      var songs =
+      response.songs.map((song) => RadioSong.fromModel(song)).toList();
+      final cached =
+      await LocalStorage.readModel(
+        'radio_playlist_$playlistId',
+      );
+      if (cached != null) {
+        final cachedIds =
+        List<dynamic>.from(cached['songs'] ?? []);
 
+        final reorderedSongs = <RadioSong>[];
+
+        for (final id in cachedIds) {
+          try {
+            reorderedSongs.add(
+              songs.firstWhere(
+                    (song) => song.id.toString() == id.toString(),
+              ),
+            );
+          } catch (_) {}
+        }
+
+        final remainingSongs =
+        songs.where(
+              (song) => !cachedIds.contains(song.id),
+        );
+
+        songs = [
+          ...reorderedSongs,
+          ...remainingSongs,
+        ];
+      }
       emit(
         state.copyWith(
-          songs:
-              response.songs.map((song) => RadioSong.fromModel(song)).toList(),
+          songs:songs,
           selectedSongIndex: 0,
           songsStatus: RadioSongsStatus.completed,
           songsMessage: response.message ?? '',
@@ -332,15 +371,29 @@ class RadioPlayerBloc extends Bloc<RadioPlayerEvent, RadioPlayerState> {
     if (state.songs.isEmpty) {
       return;
     }
+    final selectedSong = state.songs[event.songIndex];
+
+    final reorderedSongs = [
+      selectedSong,
+      ...state.songs.where((e) => e != selectedSong),
+    ];
+
     emit(
       state.copyWith(
-        selectedSongIndex: event.songIndex,
+        songs: reorderedSongs,
+        selectedSongIndex: 0,
         hasSelectedSong: true,
-        playedSongIndexes: {event.songIndex},
+        playedSongIndexes: {0},
+        playingPlaylistId: state.currentPlaylist.id,
+        playingSong: reorderedSongs.first,
       ),
     );
-    await _loadCurrentSong();
-    await _audioPlayer.play();
+
+    await _saveCurrentQueue(reorderedSongs);
+
+
+    await _playSong(reorderedSongs.first,emit);
+
   }
 
   Future<void> _onSearchSongSelected(
@@ -350,29 +403,35 @@ class RadioPlayerBloc extends Bloc<RadioPlayerEvent, RadioPlayerState> {
     if (state.searchSongs.isEmpty) {
       return;
     }
-    await _audioPlayer.stop();
+    final selectedSong =
+    state.searchSongs[event.songIndex];
+
+
     emit(
       state.copyWith(
-        songs: List<RadioSong>.from(state.searchSongs),
-        selectedSongIndex: event.songIndex,
-        isPlaying: false,
+        queueBeforeSearch:
+        List<RadioSong>.from(state.songs),
+        songs: [selectedSong],
+        selectedSongIndex: 0,
         hasSelectedSong: true,
-        playedSongIndexes: {event.songIndex},
-        duration: Duration.zero,
-        position: Duration.zero,
-        songsStatus: RadioSongsStatus.completed,
-        songsMessage: '',
-        songSearchQuery: '',
+        isSearchPlayback: true,
+        playingSearchSongId: selectedSong.id,
+        playingPlaylistId: -1,
+        playingSong: selectedSong,
       ),
     );
-    await _loadCurrentSong();
-    await _audioPlayer.play();
+
+    await _playSong(selectedSong,emit);
+
   }
 
-  void _onSongAddToQueueRequested(
+  Future<void> _onSongAddToQueueRequested(
     RadioSongAddToQueueRequested event,
     Emitter<RadioPlayerState> emit,
-  ) {
+  ) async{
+    if (state.isSearchPlayback) {
+      return;
+    }
     final queuedSongs = List<RadioSong>.from(state.songs);
     final hasCurrentSong = state.hasSelectedSong && queuedSongs.isNotEmpty;
     final insertIndex = hasCurrentSong
@@ -382,7 +441,29 @@ class RadioPlayerBloc extends Bloc<RadioPlayerEvent, RadioPlayerState> {
         .map((index) => index >= insertIndex ? index + 1 : index)
         .toSet();
 
-    queuedSongs.insert(insertIndex, event.song);
+    if (queuedSongs.any(
+          (e) => e.id == event.song.id,
+    )) {
+      return;
+    }
+
+    if (queuedSongs.any((e) => e.id == event.song.id)) {
+      return;
+    }
+
+    final insertPosition =
+    state.hasSelectedSong
+        ? state.selectedSongIndex + 1
+        : queuedSongs.length;
+
+    queuedSongs.insert(
+      insertPosition.clamp(0, queuedSongs.length),
+      event.song,
+    );
+
+    debugPrint(
+      "Queue After Add => ${queuedSongs.map((e) => e.title).toList()}",
+    );
 
     emit(
       state.copyWith(
@@ -393,6 +474,8 @@ class RadioPlayerBloc extends Bloc<RadioPlayerEvent, RadioPlayerState> {
         songsMessage: '',
       ),
     );
+    await _saveCurrentQueue(queuedSongs);
+
   }
 
   Future<void> _onShuffleRequested(
@@ -410,12 +493,16 @@ class RadioPlayerBloc extends Bloc<RadioPlayerEvent, RadioPlayerState> {
         selectedSongIndex: 0,
         hasSelectedSong: true,
         playedSongIndexes: {0},
+        playingPlaylistId: state.currentPlaylist.id,
       ),
     );
-    await _loadCurrentSong();
-    await _audioPlayer.play();
+    await _saveCurrentQueue(shuffledSongs);
+    await _playSong(shuffledSongs.first,emit);
   }
-
+  bool canAddToQueue() {
+    return state.playingPlaylistId ==
+        state.currentPlaylist.id;
+  }
   Future<void> _onPlayPauseRequested(
     RadioPlayPauseRequested event,
     Emitter<RadioPlayerState> emit,
@@ -427,30 +514,46 @@ class RadioPlayerBloc extends Bloc<RadioPlayerEvent, RadioPlayerState> {
       await _audioPlayer.pause();
     } else {
       if (_audioPlayer.audioSource == null) {
-        await _loadCurrentSong();
+        await _playSong(state.songs.first,emit);
       }
-      await _audioPlayer.play();
     }
   }
 
   Future<void> _onNextRequested(
-    RadioNextRequested event,
-    Emitter<RadioPlayerState> emit,
-  ) async {
-    if (state.songs.isEmpty) {
-      return;
-    }
-    final nextStep = _nextPlaybackStep();
+      RadioNextRequested event,
+      Emitter<RadioPlayerState> emit,
+      ) async {
+    if (state.songs.isEmpty) return;
+
+    final updatedSongs = List<RadioSong>.from(state.songs);
+
+    final currentSong = updatedSongs.removeAt(0);
+
+    updatedSongs.add(currentSong);
+    debugPrint(
+      "Before Next => ${state.songs.map((e) => e.title).toList()}",
+    );
     emit(
       state.copyWith(
-        selectedSongIndex: nextStep.index,
+        songs: updatedSongs,
+        selectedSongIndex: 0,
         position: Duration.zero,
         hasSelectedSong: true,
-        playedSongIndexes: nextStep.playedIndexes,
+        playingSong: updatedSongs.first,
       ),
     );
-    await _loadCurrentSong();
-    await _audioPlayer.play();
+
+    await Future.delayed(
+      const Duration(milliseconds: 50),
+    );
+    debugPrint(
+      "After Next => ${updatedSongs.map((e) => e.title).toList()}",
+    );
+    await _saveCurrentQueue(updatedSongs);
+
+
+    await _playSong(updatedSongs.first,emit);
+
   }
 
   Future<void> _onPreviousRequested(
@@ -460,18 +563,30 @@ class RadioPlayerBloc extends Bloc<RadioPlayerEvent, RadioPlayerState> {
     if (state.songs.isEmpty) {
       return;
     }
-    final previousIndex = state.selectedSongIndex == 0
-        ? state.songs.length - 1
-        : state.selectedSongIndex - 1;
+
+    final updatedSongs = List<RadioSong>.from(state.songs);
+
+    final lastSong = updatedSongs.removeLast();
+
+    updatedSongs.insert(0, lastSong);
+
     emit(
       state.copyWith(
-        selectedSongIndex: previousIndex,
+        songs: updatedSongs,
+        selectedSongIndex: 0,
         position: Duration.zero,
         hasSelectedSong: true,
+        playingSong: updatedSongs.first,
       ),
     );
-    await _loadCurrentSong();
-    await _audioPlayer.play();
+    await Future.delayed(
+      const Duration(milliseconds: 50),
+    );
+    await _saveCurrentQueue(updatedSongs);
+
+
+    await _playSong(updatedSongs.first,emit);
+
   }
 
   Future<void> _onSeekRequested(
@@ -522,90 +637,85 @@ class RadioPlayerBloc extends Bloc<RadioPlayerEvent, RadioPlayerState> {
   }
 
   Future<void> _onSongCompleted(
-    _RadioSongCompleted event,
-    Emitter<RadioPlayerState> emit,
-  ) async {
+      _RadioSongCompleted event,
+      Emitter<RadioPlayerState> emit,
+      ) async
+  {
     if (!state.hasSelectedSong || state.songs.isEmpty) {
       return;
     }
+    if (state.isSearchPlayback) {
 
-    final nextStep = _nextPlaybackStep();
+      await _audioPlayer.stop();
+
+      emit(
+        state.copyWith(
+          songs: state.queueBeforeSearch,
+          queueBeforeSearch: const [],
+
+          isPlaying: false,
+          isSearchPlayback: false,
+          hasSelectedSong: false,
+
+          duration: Duration.zero,
+          position: Duration.zero,
+
+          playingSearchSongId:
+          state.currentSong.id ?? 0,
+          playingSong: null,
+        ),
+      );
+
+      return;
+    }
+
+    final updatedSongs = List<RadioSong>.from(state.songs);
+
+    final completedSong = updatedSongs.removeAt(0);
+
+    updatedSongs.add(completedSong);
+    final nextSong = updatedSongs.first;
+
     emit(
       state.copyWith(
-        selectedSongIndex: nextStep.index,
+        songs: updatedSongs,
+        selectedSongIndex: 0,
         position: Duration.zero,
         duration: Duration.zero,
-        hasSelectedSong: true,
-        playedSongIndexes: nextStep.playedIndexes,
+        playingSong: nextSong
       ),
     );
-    await _loadCurrentSong();
+
+    await Future.delayed(
+      const Duration(milliseconds: 100),
+    );
+
+    await _saveCurrentQueue(updatedSongs);
+
+    await _playSong(nextSong,emit);
+
+  }
+
+
+  Future<void> _playSong(
+      RadioSong song,
+      Emitter<RadioPlayerState>? emit,
+      ) async {
+    await _audioPlayer.stop();
+
+    if (song.audioUrl != null &&
+        song.audioUrl!.startsWith('http')) {
+      await _audioPlayer.setUrl(song.audioUrl!);
+    } else {
+      await _audioPlayer.setAsset(song.audioAsset);
+    }
+    emit?.call(
+      state.copyWith(
+        playingSong: song,
+      ),
+    );
     await _audioPlayer.play();
   }
-
-  ({int index, Set<int> playedIndexes}) _nextPlaybackStep() {
-    final totalSongs = state.songs.length;
-    if (totalSongs == 0) {
-      return (index: 0, playedIndexes: <int>{});
-    }
-
-    var playedIndexes = Set<int>.from(state.playedSongIndexes)
-      ..add(state.selectedSongIndex);
-
-    if (playedIndexes.length >= totalSongs) {
-      playedIndexes = <int>{};
-    }
-
-    for (var offset = 1; offset <= totalSongs; offset++) {
-      final candidateIndex = (state.selectedSongIndex + offset) % totalSongs;
-      if (!playedIndexes.contains(candidateIndex)) {
-        playedIndexes.add(candidateIndex);
-        return (index: candidateIndex, playedIndexes: playedIndexes);
-      }
-    }
-
-    return (
-      index: state.selectedSongIndex,
-      playedIndexes: {state.selectedSongIndex},
-    );
-  }
-
-  Future<void> _loadCurrentSong() async {
-    if (!state.hasSelectedSong || state.songs.isEmpty) {
-      return;
-    }
-    final audioUrl = state.currentSong.audioUrl;
-    if (audioUrl != null && audioUrl.startsWith('http')) {
-      await _audioPlayer.setUrl(audioUrl);
-      return;
-    }
-    await _audioPlayer.setAsset(state.currentSong.audioAsset);
-  }
-
-  // Future<void> _configureAudioSession() async {
-  //   if (_audioConfigured) return;
-  //
-  //   final session = await AudioSession.instance;
-  //
-  //   await session.configure(
-  //     const AudioSessionConfiguration(
-  //       avAudioSessionCategory: AVAudioSessionCategory.playback,
-  //       avAudioSessionCategoryOptions:
-  //       AVAudioSessionCategoryOptions.allowAirPlay,
-  //       avAudioSessionMode: AVAudioSessionMode.defaultMode,
-  //       androidAudioAttributes: AndroidAudioAttributes(
-  //         contentType: AndroidAudioContentType.music,
-  //         usage: AndroidAudioUsage.media,
-  //       ),
-  //       androidAudioFocusGainType:
-  //       AndroidAudioFocusGainType.gain,
-  //       androidWillPauseWhenDucked: false,
-  //     ),
-  //   );
-  //
-  //   _audioConfigured = true;
-  //
-  // }
 
   Future<void> _configureAudioSession() async {
     if (_audioConfigured) return;
@@ -622,8 +732,20 @@ class RadioPlayerBloc extends Bloc<RadioPlayerEvent, RadioPlayerState> {
       debugPrint('Audio session config failed: $e');
     }
   }
+  Future<void> _saveCurrentQueue(List<RadioSong> songs) async {
+    final playlistId = state.currentPlaylist.id;
 
-  @override
+    if (playlistId == null) return;
+
+    await LocalStorage.saveModel(
+      'radio_playlist_$playlistId',
+      {
+        'playlistId': playlistId,
+        'currentSongId': songs.isNotEmpty ? songs.first.id : null,
+        'songs': songs.map((e) => e.id).toList(),
+      },
+    );
+  }  @override
   Future<void> close() async {
     _playlistSearchDebounce?.cancel();
     await _playerStateSubscription?.cancel();

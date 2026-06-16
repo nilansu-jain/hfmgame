@@ -380,7 +380,7 @@ class _SearchSongResults extends StatelessWidget {
               ),
             );
           },
-          onMoreTap: () => showRadioSongOptionsSheet(context, song),
+          onMoreTap: () => showRadioSongOptionsSheet(context, song,showAddToQueue: false),
         );
       },
     );

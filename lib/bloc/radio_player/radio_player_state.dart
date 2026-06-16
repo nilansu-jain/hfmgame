@@ -130,6 +130,11 @@ class RadioPlayerState extends Equatable {
   final RadioSongsStatus songsStatus;
   final String songsMessage;
   final String songSearchQuery;
+  final bool isSearchPlayback;
+  final int playingSearchSongId;
+  final int playingPlaylistId;
+  final List<RadioSong> queueBeforeSearch;
+  final RadioSong? playingSong;
 
   const RadioPlayerState({
     required this.playlists,
@@ -153,6 +158,11 @@ class RadioPlayerState extends Equatable {
     required this.songsStatus,
     required this.songsMessage,
     required this.songSearchQuery,
+    required this.isSearchPlayback,
+    required this.playingSearchSongId,
+    required this.playingPlaylistId,
+    required this.queueBeforeSearch,
+    required this.playingSong,
   });
 
   factory RadioPlayerState.initial() {
@@ -178,6 +188,11 @@ class RadioPlayerState extends Equatable {
       songsStatus: RadioSongsStatus.initial,
       songsMessage: '',
       songSearchQuery: '',
+      isSearchPlayback: false,
+      playingSearchSongId: 0,
+      playingPlaylistId: -1,
+      queueBeforeSearch: const [],
+      playingSong: null
     );
   }
 
@@ -263,6 +278,11 @@ class RadioPlayerState extends Equatable {
     RadioSongsStatus? songsStatus,
     String? songsMessage,
     String? songSearchQuery,
+    bool? isSearchPlayback,
+    int? playingSearchSongId,
+    int? playingPlaylistId,
+    List<RadioSong>? queueBeforeSearch,
+    RadioSong? playingSong,
   }) {
     return RadioPlayerState(
       playlists: playlists ?? this.playlists,
@@ -288,11 +308,17 @@ class RadioPlayerState extends Equatable {
       songsStatus: songsStatus ?? this.songsStatus,
       songsMessage: songsMessage ?? this.songsMessage,
       songSearchQuery: songSearchQuery ?? this.songSearchQuery,
+      playingSearchSongId: playingSearchSongId ?? this.playingSearchSongId,
+      isSearchPlayback: isSearchPlayback ?? this.isSearchPlayback,
+      playingPlaylistId:
+      playingPlaylistId ?? this.playingPlaylistId,
+      queueBeforeSearch: queueBeforeSearch ?? this.queueBeforeSearch,
+      playingSong: playingSong ?? this.playingSong
     );
   }
 
   @override
-  List<Object> get props => [
+  List<Object?> get props => [
         playlists,
         songs,
         searchSongs,
@@ -314,5 +340,10 @@ class RadioPlayerState extends Equatable {
         songsStatus,
         songsMessage,
         songSearchQuery,
+        isSearchPlayback,
+        playingSearchSongId,
+    playingPlaylistId,
+    queueBeforeSearch,
+    playingSong
       ];
 }

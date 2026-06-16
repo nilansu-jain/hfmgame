@@ -15,7 +15,9 @@ class RadioMiniPlayer extends StatelessWidget {
           return const SizedBox.shrink();
         }
 
-        final song = state.currentSong;
+        final song =
+            state.playingSong ??
+                state.currentSong;
 
         return Container(
           height: 80,

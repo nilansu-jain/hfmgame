@@ -9,7 +9,6 @@ import 'package:gaanap_admin_new/views/radio/widgets/radio_song_options_sheet.da
 class RadioPlaylistSongsScreen extends StatelessWidget {
   const RadioPlaylistSongsScreen({super.key});
 
-  final List<RadioSong> queueSongs;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,6 +51,7 @@ class RadioPlaylistSongsScreen extends StatelessWidget {
                   }
 
                   final songs = state.filteredSongs;
+
                   if (songs.isEmpty) {
                     return const Center(
                       child: Text(
@@ -70,10 +70,14 @@ class RadioPlaylistSongsScreen extends StatelessWidget {
                     separatorBuilder: (_, __) => const SizedBox(height: 14),
                     itemBuilder: (context, index) {
                       final song = songs[index];
+                      final isPlaying =
+                          state.hasSelectedSong &&
+                              state.currentSong.id == song.id;
                       return _SongTile(
                         song: song,
                         onTap: () {
                           final originalIndex = state.songs.indexOf(song);
+
                           context
                               .read<RadioPlayerBloc>()
                               .add(RadioSongSelected(originalIndex));
@@ -91,6 +95,7 @@ class RadioPlaylistSongsScreen extends StatelessWidget {
                           context,
                           song,
                         ),
+                        isPlaying: isPlaying,
                       );
                     },
                   );
@@ -322,18 +327,22 @@ class _SongTile extends StatelessWidget {
   final RadioSong song;
   final VoidCallback onTap;
   final VoidCallback onMoreTap;
+  final bool isPlaying;
 
   const _SongTile({
     required this.song,
     required this.onTap,
     required this.onMoreTap,
+    required this.isPlaying
   });
 
   @override
   Widget build(BuildContext context) {
     // debugPrint("Song :: ${song.toString()}");
     return Material(
-      color: RadioThemeColors.row,
+      color: isPlaying
+          ? Colors.blue.withOpacity(.15)
+          : RadioThemeColors.row,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onTap,

@@ -6,7 +6,7 @@ import 'package:gaanap_admin_new/views/radio/radio_theme.dart';
 Future<void> showRadioSongOptionsSheet(
   BuildContext context,
   RadioSong song,
-) {
+    {bool showAddToQueue = true}) {
   final bloc = context.read<RadioPlayerBloc>();
 
   return showModalBottomSheet<void>(
@@ -71,20 +71,49 @@ Future<void> showRadioSongOptionsSheet(
                 _SongDetail(label: 'Composer', value: song.composer),
                 _SongDetail(label: 'Duration', value: song.durationLabel),
                 const SizedBox(height: 18),
+                if(showAddToQueue)
                 SizedBox(
                   width: double.infinity,
                   height: 46,
                   child: ElevatedButton.icon(
-                    onPressed: () {
-                      bloc.add(RadioSongAddToQueueRequested(song));
-                      Navigator.pop(sheetContext);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Song added to queue'),
-                          duration: Duration(seconds: 2),
-                        ),
-                      );
-                    },
+                      onPressed: () {
+
+                        final bloc =
+                        context.read<RadioPlayerBloc>();
+
+                        if (
+                        bloc.state.playingPlaylistId !=
+                        bloc.state.currentPlaylist.id
+
+                           ){
+
+                          Navigator.pop(context);
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                "Please select current playlist for add to queue",
+                              ),
+                            ),
+                          );
+
+                          return;
+                        }
+
+                        bloc.add(
+                          RadioSongAddToQueueRequested(song),
+                        );
+
+                        Navigator.pop(context);
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              "Song added to queue",
+                            ),
+                          ),
+                        );
+                      },
                     icon: const Icon(Icons.playlist_add_rounded),
                     label: const Text('Add to Queue'),
                     style: ElevatedButton.styleFrom(
