@@ -32,7 +32,9 @@ class _RadioPlayerScreenState extends State<RadioPlayerScreen> {
         body: SafeArea(
           child: BlocBuilder<RadioPlayerBloc, RadioPlayerState>(
             builder: (context, state) {
-              final song = state.currentSong;
+              final song =
+              state.playingSong ??
+                  state.currentSong;
               final maxMilliseconds = state.duration.inMilliseconds == 0
                   ? 1.0
                   : state.duration.inMilliseconds.toDouble();

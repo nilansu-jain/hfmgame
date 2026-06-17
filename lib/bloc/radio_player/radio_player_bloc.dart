@@ -22,6 +22,9 @@ class RadioPlayerBloc extends Bloc<RadioPlayerEvent, RadioPlayerState> {
   Timer? _playlistSearchDebounce;
   int _playlistSearchRequestId = 0;
   bool _audioConfigured = false;
+  bool _isManuallyChangingSong = false;
+  bool _isSongChangeInProgress = false; // New flag to prevent duplicate completes
+  dynamic _lastCompletedSongId; // Track last completed song to avoid duplicates
 
   RadioPlayerBloc({required this.radioRepository})
       : super(RadioPlayerState.initial()) {
@@ -56,8 +59,10 @@ class RadioPlayerBloc extends Bloc<RadioPlayerEvent, RadioPlayerState> {
     await _configureAudioSession();
     _playerStateSubscription ??=
         _audioPlayer.playerStateStream.listen((playerState) {
+      debugPrint("[playerStateStream] new state: playing=${playerState.playing}, processingState=${playerState.processingState}");
       add(_RadioPlaybackChanged(playerState.playing));
       if (playerState.processingState == ProcessingState.completed) {
+        debugPrint("[playerStateStream] ProcessingState.completed detected! Adding _RadioSongCompleted() event!");
         add(_RadioSongCompleted());
       }
     });
@@ -253,17 +258,21 @@ class RadioPlayerBloc extends Bloc<RadioPlayerEvent, RadioPlayerState> {
   }
 
   Future<void> _onPlaylistSelected(
-    RadioPlaylistSelected event,
-    Emitter<RadioPlayerState> emit,
-  ) async {
+      RadioPlaylistSelected event,
+      Emitter<RadioPlayerState> emit,
+      ) async {
     final selectedPlaylist =
     state.playlists[event.playlistIndex];
 
+    // Check: if we are ALREADY PLAYING this playlist (and songs list is non-empty), do NOT reload!
     if (!state.isSearchPlayback &&
         state.currentPlaylist.id == selectedPlaylist.id &&
-        state.songs.isNotEmpty) {
+        state.songs.isNotEmpty &&
+        state.playingPlaylistId == selectedPlaylist.id) {
+      debugPrint("[_onPlaylistSelected] Already playing this playlist, skipping reload!");
       return;
     }
+
     // await _audioPlayer.stop();
     emit(
       state.copyWith(
@@ -371,6 +380,13 @@ class RadioPlayerBloc extends Bloc<RadioPlayerEvent, RadioPlayerState> {
     if (state.songs.isEmpty) {
       return;
     }
+
+    // Set flags to prevent duplicate song completion event
+    _isManuallyChangingSong = true;
+    _isSongChangeInProgress = true;
+    _lastCompletedSongId = null;
+    debugPrint("[_onSongSelected] Setting manual change and song change in progress flags and resetting _lastCompletedSongId");
+
     final selectedSong = state.songs[event.songIndex];
 
     final reorderedSongs = [
@@ -392,8 +408,12 @@ class RadioPlayerBloc extends Bloc<RadioPlayerEvent, RadioPlayerState> {
     await _saveCurrentQueue(reorderedSongs);
 
 
-    await _playSong(reorderedSongs.first,emit);
+    await _playSong(reorderedSongs.first);
 
+    // Clear flags after song change is complete
+    _isManuallyChangingSong = false;
+    _isSongChangeInProgress = false;
+    debugPrint("[_onSongSelected] Cleared manual change and song change in progress flags");
   }
 
   Future<void> _onSearchSongSelected(
@@ -403,6 +423,13 @@ class RadioPlayerBloc extends Bloc<RadioPlayerEvent, RadioPlayerState> {
     if (state.searchSongs.isEmpty) {
       return;
     }
+
+    // Set flags to prevent duplicate song completion event
+    _isManuallyChangingSong = true;
+    _isSongChangeInProgress = true;
+    _lastCompletedSongId = null;
+    debugPrint("[_onSearchSongSelected] Setting manual change and song change in progress flags and resetting _lastCompletedSongId");
+
     final selectedSong =
     state.searchSongs[event.songIndex];
 
@@ -421,61 +448,59 @@ class RadioPlayerBloc extends Bloc<RadioPlayerEvent, RadioPlayerState> {
       ),
     );
 
-    await _playSong(selectedSong,emit);
+    await _playSong(selectedSong);
 
+    // Clear flags after song change is complete
+    _isManuallyChangingSong = false;
+    _isSongChangeInProgress = false;
+    debugPrint("[_onSearchSongSelected] Cleared manual change and song change in progress flags");
   }
 
   Future<void> _onSongAddToQueueRequested(
-    RadioSongAddToQueueRequested event,
-    Emitter<RadioPlayerState> emit,
-  ) async{
+      RadioSongAddToQueueRequested event,
+      Emitter<RadioPlayerState> emit,
+      ) async {
+    debugPrint("[_onSongAddToQueueRequested] CALLED!");
+    debugPrint("[_onSongAddToQueueRequested] event.song: ${event.song.title}");
+    debugPrint("[_onSongAddToQueueRequested] isSearchPlayback: ${state.isSearchPlayback}");
     if (state.isSearchPlayback) {
+      debugPrint("[_onSongAddToQueueRequested] search playback, returning early");
       return;
     }
+
     final queuedSongs = List<RadioSong>.from(state.songs);
-    final hasCurrentSong = state.hasSelectedSong && queuedSongs.isNotEmpty;
-    final insertIndex = hasCurrentSong
-        ? min(state.selectedSongIndex + 1, queuedSongs.length)
-        : queuedSongs.length;
-    final playedIndexes = state.playedSongIndexes
-        .map((index) => index >= insertIndex ? index + 1 : index)
-        .toSet();
+    debugPrint("[_onSongAddToQueueRequested] current songs: ${queuedSongs.map((e) => e.title).toList()}");
 
-    if (queuedSongs.any(
-          (e) => e.id == event.song.id,
-    )) {
-      return;
+    // Check if song already exists
+    final existingIndex = queuedSongs.indexWhere((e) => e.id == event.song.id);
+    if (existingIndex != -1) {
+      debugPrint("[_onSongAddToQueueRequested] song exists at index $existingIndex, moving it to position 1");
+      // Remove existing song first
+      queuedSongs.removeAt(existingIndex);
     }
 
-    if (queuedSongs.any((e) => e.id == event.song.id)) {
-      return;
-    }
+    // Insert at position 1 (after current song) or 0 if empty
+    final insertPosition = queuedSongs.isNotEmpty ? 1 : 0;
+    debugPrint("[_onSongAddToQueueRequested] inserting song at position $insertPosition");
 
-    final insertPosition =
-    state.hasSelectedSong
-        ? state.selectedSongIndex + 1
-        : queuedSongs.length;
+    queuedSongs.insert(insertPosition, event.song);
 
-    queuedSongs.insert(
-      insertPosition.clamp(0, queuedSongs.length),
-      event.song,
-    );
-
-    debugPrint(
-      "Queue After Add => ${queuedSongs.map((e) => e.title).toList()}",
-    );
+    debugPrint("[_onSongAddToQueueRequested] BEFORE EMIT - songs: ${state.songs.map((s) => s.title).toList()}, adding/moving: ${event.song.title} at position $insertPosition");
 
     emit(
       state.copyWith(
         songs: queuedSongs,
-        selectedSongIndex: state.hasSelectedSong ? state.selectedSongIndex : 0,
-        playedSongIndexes: playedIndexes,
         songsStatus: RadioSongsStatus.completed,
-        songsMessage: '',
       ),
     );
+
+    debugPrint("[_onSongAddToQueueRequested] AFTER EMIT - new songs: ${queuedSongs.map((s) => s.title).toList()}");
+
     await _saveCurrentQueue(queuedSongs);
 
+    debugPrint(
+      "Queue => ${queuedSongs.map((e) => e.title).toList()}",
+    );
   }
 
   Future<void> _onShuffleRequested(
@@ -485,6 +510,12 @@ class RadioPlayerBloc extends Bloc<RadioPlayerEvent, RadioPlayerState> {
     if (state.songs.isEmpty) {
       return;
     }
+
+    // Set flags to prevent duplicate song completion event
+    _isManuallyChangingSong = true;
+    _isSongChangeInProgress = true;
+    _lastCompletedSongId = null;
+    debugPrint("[_onShuffleRequested] Setting manual change and song change in progress flags and resetting _lastCompletedSongId");
 
     final shuffledSongs = List<RadioSong>.from(state.songs)..shuffle(Random());
     emit(
@@ -497,8 +528,14 @@ class RadioPlayerBloc extends Bloc<RadioPlayerEvent, RadioPlayerState> {
       ),
     );
     await _saveCurrentQueue(shuffledSongs);
-    await _playSong(shuffledSongs.first,emit);
+    await _playSong(shuffledSongs.first);
+
+    // Clear flags after song change is complete
+    _isManuallyChangingSong = false;
+    _isSongChangeInProgress = false;
+    debugPrint("[_onShuffleRequested] Cleared manual change and song change in progress flags");
   }
+
   bool canAddToQueue() {
     return state.playingPlaylistId ==
         state.currentPlaylist.id;
@@ -514,7 +551,9 @@ class RadioPlayerBloc extends Bloc<RadioPlayerEvent, RadioPlayerState> {
       await _audioPlayer.pause();
     } else {
       if (_audioPlayer.audioSource == null) {
-        await _playSong(state.songs.first,emit);
+        await _playSong(state.songs.first);
+      } else {
+        await _audioPlayer.play();
       }
     }
   }
@@ -525,35 +564,45 @@ class RadioPlayerBloc extends Bloc<RadioPlayerEvent, RadioPlayerState> {
       ) async {
     if (state.songs.isEmpty) return;
 
-    final updatedSongs = List<RadioSong>.from(state.songs);
+    // Set flags to prevent duplicate song completion events
+    _isManuallyChangingSong = true;
+    _isSongChangeInProgress = true;
+    _lastCompletedSongId = null;
+    debugPrint("[_onNextRequested] Setting manual change and song change in progress flags and resetting _lastCompletedSongId");
 
-    final currentSong = updatedSongs.removeAt(0);
+    final updatedSongs =
+    List<RadioSong>.from(state.songs);
+
+    final currentSong =
+    updatedSongs.removeAt(0);
 
     updatedSongs.add(currentSong);
-    debugPrint(
-      "Before Next => ${state.songs.map((e) => e.title).toList()}",
-    );
+
+    debugPrint("[_onNextRequested] BEFORE EMIT - songs: ${state.songs.map((s) => s.title).toList()}");
+    debugPrint("[_onNextRequested] currentSong: ${currentSong.title}, nextSong: ${updatedSongs.first.title}");
+
     emit(
       state.copyWith(
         songs: updatedSongs,
         selectedSongIndex: 0,
         position: Duration.zero,
-        hasSelectedSong: true,
+        duration: Duration.zero,
         playingSong: updatedSongs.first,
       ),
     );
 
-    await Future.delayed(
-      const Duration(milliseconds: 50),
-    );
-    debugPrint(
-      "After Next => ${updatedSongs.map((e) => e.title).toList()}",
-    );
+    debugPrint("[_onNextRequested] AFTER EMIT - new songs: ${updatedSongs.map((s) => s.title).toList()}");
+
     await _saveCurrentQueue(updatedSongs);
 
+    await _playSong(
+      updatedSongs.first,
+    );
 
-    await _playSong(updatedSongs.first,emit);
-
+    // Clear flags after song change is complete
+    _isManuallyChangingSong = false;
+    _isSongChangeInProgress = false;
+    debugPrint("[_onNextRequested] Cleared manual change and song change in progress flags");
   }
 
   Future<void> _onPreviousRequested(
@@ -563,6 +612,12 @@ class RadioPlayerBloc extends Bloc<RadioPlayerEvent, RadioPlayerState> {
     if (state.songs.isEmpty) {
       return;
     }
+
+    // Set flags to prevent duplicate song completion event
+    _isManuallyChangingSong = true;
+    _isSongChangeInProgress = true;
+    _lastCompletedSongId = null;
+    debugPrint("[_onPreviousRequested] Setting manual change and song change in progress flags and resetting _lastCompletedSongId");
 
     final updatedSongs = List<RadioSong>.from(state.songs);
 
@@ -585,20 +640,32 @@ class RadioPlayerBloc extends Bloc<RadioPlayerEvent, RadioPlayerState> {
     await _saveCurrentQueue(updatedSongs);
 
 
-    await _playSong(updatedSongs.first,emit);
+    await _playSong(updatedSongs.first);
 
+    // Clear flags after song change is complete
+    _isManuallyChangingSong = false;
+    _isSongChangeInProgress = false;
+    debugPrint("[_onPreviousRequested] Cleared manual change and song change in progress flags");
   }
 
   Future<void> _onSeekRequested(
     RadioSeekRequested event,
     Emitter<RadioPlayerState> emit,
   ) async {
+    debugPrint("[_onSeekRequested] ENTERED, requested: ${event.position}");
     if (!state.hasSelectedSong || state.songs.isEmpty) {
+      debugPrint("[_onSeekRequested] no selected song or songs empty, returning");
       return;
     }
 
+    // Reset last completed song id when user seeks, in case seek triggers a completion event
+    _lastCompletedSongId = null;
+    debugPrint("[_onSeekRequested] resetting _lastCompletedSongId to null to allow completion after seek");
+
     final duration = _audioPlayer.duration ?? state.duration;
+    debugPrint("[_onSeekRequested] duration: $duration");
     if (duration <= Duration.zero) {
+      debugPrint("[_onSeekRequested] duration <= 0, returning");
       return;
     }
 
@@ -611,8 +678,10 @@ class RadioPlayerBloc extends Bloc<RadioPlayerEvent, RadioPlayerState> {
         ? safeEndPosition
         : requestedPosition;
 
+    debugPrint("[_onSeekRequested] seekPosition: $seekPosition");
     emit(state.copyWith(position: seekPosition));
     await _audioPlayer.seek(seekPosition);
+    debugPrint("[_onSeekRequested] seek complete, isPlaying: ${_audioPlayer.playing}, audioSource: ${_audioPlayer.audioSource}");
   }
 
   void _onPlaybackChanged(
@@ -641,9 +710,33 @@ class RadioPlayerBloc extends Bloc<RadioPlayerEvent, RadioPlayerState> {
       Emitter<RadioPlayerState> emit,
       ) async
   {
+    debugPrint("[_onSongCompleted] ENTERED!");
     if (!state.hasSelectedSong || state.songs.isEmpty) {
+      debugPrint("[_onSongCompleted] no selected song or songs empty, returning");
       return;
     }
+
+    final currentSong = state.songs.first;
+    debugPrint("[_onSongCompleted] currentSong: ${currentSong.title}, id: ${currentSong.id}");
+    debugPrint("[_onSongCompleted] _lastCompletedSongId: $_lastCompletedSongId, _isSongChangeInProgress: $_isSongChangeInProgress");
+
+    // Skip if user is manually changing song OR a song change is in progress
+    if (_isManuallyChangingSong || _isSongChangeInProgress) {
+      debugPrint("[_onSongCompleted] Skipping - manual song change OR song change in progress");
+      return;
+    }
+
+    // Skip if we already processed this song completion
+    if (_lastCompletedSongId == currentSong.id) {
+      debugPrint("[_onSongCompleted] Skipping - already completed this song id: ${currentSong.id}");
+      return;
+    }
+
+    // Set flags that we're in a song change (auto)
+    _isSongChangeInProgress = true;
+    _lastCompletedSongId = currentSong.id;
+    debugPrint("[_onSongCompleted] setting song change in progress flag and _lastCompletedSongId to ${_lastCompletedSongId}");
+
     if (state.isSearchPlayback) {
 
       await _audioPlayer.stop();
@@ -666,6 +759,7 @@ class RadioPlayerBloc extends Bloc<RadioPlayerEvent, RadioPlayerState> {
         ),
       );
 
+      _isSongChangeInProgress = false; // clear flag
       return;
     }
 
@@ -675,6 +769,9 @@ class RadioPlayerBloc extends Bloc<RadioPlayerEvent, RadioPlayerState> {
 
     updatedSongs.add(completedSong);
     final nextSong = updatedSongs.first;
+
+    debugPrint("[_onSongCompleted] BEFORE EMIT - songs: ${state.songs.map((s) => s.title).toList()}");
+    debugPrint("[_onSongCompleted] completedSong: ${completedSong.title}, nextSong: ${nextSong.title}");
 
     emit(
       state.copyWith(
@@ -686,35 +783,38 @@ class RadioPlayerBloc extends Bloc<RadioPlayerEvent, RadioPlayerState> {
       ),
     );
 
+    debugPrint("[_onSongCompleted] AFTER EMIT - new songs: ${updatedSongs.map((s) => s.title).toList()}");
+
     await Future.delayed(
       const Duration(milliseconds: 100),
     );
 
     await _saveCurrentQueue(updatedSongs);
 
-    await _playSong(nextSong,emit);
+    await _playSong(nextSong);
 
+    // Clear the song change flag only after everything is done!
+    _isSongChangeInProgress = false;
+    debugPrint("[_onSongCompleted] cleared song change in progress flag");
   }
 
 
   Future<void> _playSong(
       RadioSong song,
-      Emitter<RadioPlayerState>? emit,
       ) async {
+    debugPrint("[_playSong] START - song: ${song.title}");
     await _audioPlayer.stop();
 
     if (song.audioUrl != null &&
         song.audioUrl!.startsWith('http')) {
+      debugPrint("[_playSong] Setting URL: ${song.audioUrl}");
       await _audioPlayer.setUrl(song.audioUrl!);
     } else {
+      debugPrint("[_playSong] Setting asset: ${song.audioAsset}");
       await _audioPlayer.setAsset(song.audioAsset);
     }
-    emit?.call(
-      state.copyWith(
-        playingSong: song,
-      ),
-    );
     await _audioPlayer.play();
+    debugPrint("[_playSong] COMPLETE - audio should be playing: ${song.title}");
   }
 
   Future<void> _configureAudioSession() async {

@@ -77,16 +77,19 @@ Future<void> showRadioSongOptionsSheet(
                   height: 46,
                   child: ElevatedButton.icon(
                       onPressed: () {
-
+                        print('[showRadioSongOptionsSheet] Add to Queue button pressed');
+                        print('[showRadioSongOptionsSheet] song: ${song.title}');
                         final bloc =
                         context.read<RadioPlayerBloc>();
+                        print('[showRadioSongOptionsSheet] playingPlaylistId: ${bloc.state.playingPlaylistId}');
+                        print('[showRadioSongOptionsSheet] currentPlaylist.id: ${bloc.state.currentPlaylist.id}');
 
                         if (
                         bloc.state.playingPlaylistId !=
                         bloc.state.currentPlaylist.id
 
                            ){
-
+                          print('[showRadioSongOptionsSheet] playlist IDs do NOT match');
                           Navigator.pop(context);
 
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -99,6 +102,7 @@ Future<void> showRadioSongOptionsSheet(
 
                           return;
                         }
+                        print('[showRadioSongOptionsSheet] playlist IDs match! Adding song to queue');
 
                         bloc.add(
                           RadioSongAddToQueueRequested(song),
