@@ -579,7 +579,8 @@ class _GameScreenState extends State<GameScreen> {
                         child: AnimatedOpacity(
                           duration: Duration(milliseconds: 300),
                           opacity: performAnswer
-                              ? (selectedOption == 1  ? 1.0 : 0.4)  // fade others
+                              ? (selectedOption == 1 || (currentClip.options?[0].clipCorrectOption.toString().contains("C") ?? false)
+                              ? 1.0 : 0.4)  // fade others
                               : 1.0,
                           child: InkWell(
                             onTap:(){
@@ -602,9 +603,10 @@ class _GameScreenState extends State<GameScreen> {
                                       color: AppColors.op1Color,
                                       borderRadius: BorderRadius.circular(15),
                                       border: Border.all(
-                                        width: performAnswer  && (((currentClip.options?[0].clipCorrectOption.toString().contains("W") ?? false) && selectedOption == 1) || ((currentClip.options?[0].clipCorrectOption.toString().contains("C") ?? false)&& selectedOption == 1))
+                                        width: performAnswer  && (((currentClip.options?[0].clipCorrectOption.toString().contains("W") ?? false)
+                                            && selectedOption == 1) || ((currentClip.options?[0].clipCorrectOption.toString().contains("C") ?? false)))
                                             ? 4 :0,
-                                        color: showResult && performAnswer  && selectedOption == 1 && (currentClip.options?[0].clipCorrectOption.toString().contains("C") ?? false)
+                                        color: showResult   && (currentClip.options?[0].clipCorrectOption.toString().contains("C") ?? false)
                                           ? AppColors.rightAnswerColor
                                             : showResult && performAnswer  && selectedOption == 1 && (currentClip.options?[0].clipCorrectOption.toString().contains("W") ?? false)
                                           ? AppColors.wrongAnswerColor
@@ -643,7 +645,7 @@ class _GameScreenState extends State<GameScreen> {
                                   width: 30,
                                   height: 30,) : Container(),
 
-                                showResult &&  performAnswer && selectedOption == 1 && (currentClip.options?[0].clipCorrectOption.toString().contains("C") ?? false) ?
+                                showResult && (currentClip.options?[0].clipCorrectOption.toString().contains("C") ?? false) ?
                                 Image.asset(AppImages.right,
                                   width: 30,
                                   height: 30,) : Container()
@@ -658,7 +660,8 @@ class _GameScreenState extends State<GameScreen> {
                         child: AnimatedOpacity(
                           duration: Duration(milliseconds: 300),
                           opacity: performAnswer
-                              ? (selectedOption == 2  ? 1.0 : 0.4)  // fade others
+                              ? (selectedOption == 2 || (currentClip.options?[1].clipCorrectOption.toString().contains("C") ?? false)
+                              ? 1.0 : 0.4)  // fade others
                               : 1.0,
                           child: InkWell(
                             onTap:(){
@@ -683,9 +686,10 @@ class _GameScreenState extends State<GameScreen> {
                                         color: AppColors.op2Color,
                                         borderRadius: BorderRadius.circular(15),
                                         border: Border.all(
-                                            width: performAnswer  && (((currentClip.options?[1].clipCorrectOption.toString().contains("W") ?? false) && selectedOption == 2) || ((currentClip.options?[1].clipCorrectOption.toString().contains("C") ?? false) && selectedOption == 2))
+                                            width: performAnswer  && (((currentClip.options?[1].clipCorrectOption.toString().contains("W") ?? false)
+                                                && selectedOption == 2) || ((currentClip.options?[1].clipCorrectOption.toString().contains("C") ?? false) ))
                                                 ? 4 :0,
-                                            color: showResult && performAnswer  && selectedOption == 2 && (currentClip.options?[1].clipCorrectOption.toString().contains("C") ?? false)
+                                            color: showResult  && (currentClip.options?[1].clipCorrectOption.toString().contains("C") ?? false)
                                                 ? AppColors.rightAnswerColor
                                                 : showResult && performAnswer  && selectedOption == 2 && (currentClip.options?[1].clipCorrectOption.toString().contains("W") ?? false)
                                                 ? AppColors.wrongAnswerColor
@@ -725,7 +729,7 @@ class _GameScreenState extends State<GameScreen> {
                               width: 30,
                               height: 30,) : Container(),
 
-                                showResult &&  performAnswer && selectedOption == 2 && (currentClip.options?[1].clipCorrectOption.toString().contains("C") ?? false)  ?
+                                showResult  && (currentClip.options?[1].clipCorrectOption.toString().contains("C") ?? false)  ?
                                 Image.asset(AppImages.right,
                                   width: 30,
                                   height: 30,) : Container()
@@ -747,7 +751,8 @@ class _GameScreenState extends State<GameScreen> {
                         child: AnimatedOpacity(
                           duration: Duration(milliseconds: 300),
                           opacity: performAnswer
-                              ? (selectedOption == 3  ? 1.0 : 0.4)  // fade others
+                              ? (selectedOption == 3 || (currentClip.options?[2].clipCorrectOption.toString().contains("C") ?? false)
+                              ? 1.0 : 0.4)  // fade others
                               : 1.0,
                           child: InkWell(
                             onTap:(){
@@ -772,9 +777,10 @@ class _GameScreenState extends State<GameScreen> {
                                         color: AppColors.op3Color,
                                         borderRadius: BorderRadius.circular(15),
                                         border: Border.all(
-                                            width: performAnswer  && (((currentClip.options?[2].clipCorrectOption.toString().contains("W") ?? false) && selectedOption == 3) || ((currentClip.options?[2].clipCorrectOption.toString().contains("C") ?? false) && selectedOption == 3))
+                                            width: performAnswer  && (((currentClip.options?[2].clipCorrectOption.toString().contains("W") ?? false)
+                                                && selectedOption == 3) || ((currentClip.options?[2].clipCorrectOption.toString().contains("C") ?? false) ))
                                                 ? 4 :0,
-                                            color: showResult && performAnswer  && selectedOption == 3 && (currentClip.options?[2].clipCorrectOption.toString().contains("C") ?? false)
+                                            color: showResult  && (currentClip.options?[2].clipCorrectOption.toString().contains("C") ?? false)
                                                 ? AppColors.rightAnswerColor
                                                 : showResult && performAnswer  && selectedOption == 3 && (currentClip.options?[2].clipCorrectOption.toString().contains("W") ?? false)
                                                 ? AppColors.wrongAnswerColor
@@ -813,7 +819,7 @@ class _GameScreenState extends State<GameScreen> {
                                   width: 30,
                                   height: 30,) : Container(),
 
-                                showResult && performAnswer && selectedOption == 3 && (currentClip.options?[2].clipCorrectOption.toString().contains("C") ?? false)  ?
+                                showResult  && (currentClip.options?[2].clipCorrectOption.toString().contains("C") ?? false)  ?
                                 Image.asset(AppImages.right,
                                   width: 30,
                                   height: 30,) : Container()
@@ -828,7 +834,8 @@ class _GameScreenState extends State<GameScreen> {
                         child: AnimatedOpacity(
                           duration: Duration(milliseconds: 300),
                           opacity: performAnswer
-                              ? (selectedOption == 4  ? 1.0 : 0.4)  // fade others
+                              ? (selectedOption == 4 || (currentClip.options?[3].clipCorrectOption.toString().contains("C") ?? false)
+                              ? 1.0 : 0.4)  // fade others
                               : 1.0,
                           child: InkWell(
                             onTap:(){
@@ -854,9 +861,10 @@ class _GameScreenState extends State<GameScreen> {
                                         color: AppColors.op4Color,
                                         borderRadius: BorderRadius.circular(15),
                                         border: Border.all(
-                                            width: performAnswer  && (((currentClip.options?[3].clipCorrectOption.toString().contains("W") ?? false) && selectedOption == 4) || ((currentClip.options?[3].clipCorrectOption.toString().contains("C") ?? false) && selectedOption == 4))
+                                            width: performAnswer  && (((currentClip.options?[3].clipCorrectOption.toString().contains("W") ?? false)
+                                                && selectedOption == 4) || ((currentClip.options?[3].clipCorrectOption.toString().contains("C") ?? false) ))
                                                 ? 4 :0,
-                                            color: showResult &&  performAnswer  && selectedOption == 4 && (currentClip.options?[3].clipCorrectOption.toString().contains("C") ?? false)
+                                            color: showResult  && (currentClip.options?[3].clipCorrectOption.toString().contains("C") ?? false)
                                                 ? AppColors.rightAnswerColor
                                                 : showResult && performAnswer  && selectedOption == 4 && (currentClip.options?[3].clipCorrectOption.toString().contains("W") ?? false)
                                                 ? AppColors.wrongAnswerColor
@@ -896,7 +904,7 @@ class _GameScreenState extends State<GameScreen> {
                                   width: 30,
                                   height: 30,) : Container(),
 
-                                showResult && performAnswer && selectedOption == 4 && (currentClip.options?[3].clipCorrectOption.toString().contains("C") ?? false)  ?
+                                showResult && (currentClip.options?[3].clipCorrectOption.toString().contains("C") ?? false)  ?
                                 Image.asset(AppImages.right,
                                   width: 30,
                                   height: 30,) : Container()
