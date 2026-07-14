@@ -30,7 +30,11 @@ class LoginHttpRepository implements LoginRepository{
           filename: profilePhoto.path.split('/').last,
         ),
     });
-    debugPrint("Form Data :: ${formData}");
+    if (kDebugMode) {
+      print("URL ::: ${AppUrl.loginUrl}");
+      print("Params :: ${formData.fields}");
+      print("Params :: ${formData.files}");
+    }
     var response = await _api.postMultipartApi(AppUrl.loginUrl, formData);
     debugPrint("Data : ${UserModel.fromJson(response)}");
     return UserModel.fromJson(response);

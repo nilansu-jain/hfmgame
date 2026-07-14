@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
@@ -77,6 +78,13 @@ class Networkapiservices extends BaseApiServices {
     String url,
     FormData formData,
   ) async {
+
+    (dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
+      final client = HttpClient();
+      client.badCertificateCallback =
+          (X509Certificate cert, String host, int port) => true;
+      return client;
+    };
     final response = await dio.post(
       url,
       data: formData,
@@ -93,6 +101,12 @@ class Networkapiservices extends BaseApiServices {
   Future<dynamic> postJsonApi(String url, var data, {var header}) async {
     dynamic jsonResponse;
     try {
+      (dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
+        final client = HttpClient();
+        client.badCertificateCallback =
+            (X509Certificate cert, String host, int port) => true;
+        return client;
+      };
       final headers = <String, String>{
         "Content-Type": "application/json",
         if (header != null) ...Map<String, String>.from(header),
