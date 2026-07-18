@@ -402,6 +402,7 @@ class RadioPlayerBloc extends Bloc<RadioPlayerEvent, RadioPlayerState> {
         playedSongIndexes: {0},
         playingPlaylistId: state.currentPlaylist.id,
         playingSong: reorderedSongs.first,
+        isSearchPlayback: false, // Ensure not in search playback mode when selecting from playlist
       ),
     );
 
@@ -525,6 +526,8 @@ class RadioPlayerBloc extends Bloc<RadioPlayerEvent, RadioPlayerState> {
         hasSelectedSong: true,
         playedSongIndexes: {0},
         playingPlaylistId: state.currentPlaylist.id,
+        isSearchPlayback: false, // Make sure we're not in search playback mode
+        playingSong: shuffledSongs.first,
       ),
     );
     await _saveCurrentQueue(shuffledSongs);
@@ -588,6 +591,7 @@ class RadioPlayerBloc extends Bloc<RadioPlayerEvent, RadioPlayerState> {
         position: Duration.zero,
         duration: Duration.zero,
         playingSong: updatedSongs.first,
+        isSearchPlayback: false, // Ensure not in search playback mode when playing next from playlist
       ),
     );
 
@@ -632,6 +636,7 @@ class RadioPlayerBloc extends Bloc<RadioPlayerEvent, RadioPlayerState> {
         position: Duration.zero,
         hasSelectedSong: true,
         playingSong: updatedSongs.first,
+        isSearchPlayback: false, // Ensure not in search playback mode when playing previous from playlist
       ),
     );
     await Future.delayed(
@@ -779,7 +784,8 @@ class RadioPlayerBloc extends Bloc<RadioPlayerEvent, RadioPlayerState> {
         selectedSongIndex: 0,
         position: Duration.zero,
         duration: Duration.zero,
-        playingSong: nextSong
+        playingSong: nextSong,
+        isSearchPlayback: false, // Ensure not in search playback mode when song completes
       ),
     );
 

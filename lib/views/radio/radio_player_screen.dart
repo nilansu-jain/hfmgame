@@ -247,15 +247,24 @@ class _PlayerHeader extends StatelessWidget {
               size: 36,
             ),
           ),
-          const Expanded(
-            child: Text(
-              '1 Star HFM',
-              style: TextStyle(
-                color: RadioThemeColors.navy,
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-              ),
-              textAlign: TextAlign.center,
+          Expanded(
+            child: BlocBuilder<RadioPlayerBloc, RadioPlayerState>(
+              builder: (context, state) {
+                final title = state.isSearchPlayback
+                    ? (state.playingSong?.title ?? '')
+                    : state.currentPlaylist.title;
+                return Text(
+                  title,
+                  style: const TextStyle(
+                    color: RadioThemeColors.navy,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                );
+              },
             ),
           ),
           const SizedBox(
