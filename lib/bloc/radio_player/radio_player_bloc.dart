@@ -408,13 +408,12 @@ class RadioPlayerBloc extends Bloc<RadioPlayerEvent, RadioPlayerState> {
 
     await _saveCurrentQueue(reorderedSongs);
 
-
-    await _playSong(reorderedSongs.first);
-
-    // Clear flags after song change is complete
+    // Clear flags BEFORE calling _playSong
     _isManuallyChangingSong = false;
     _isSongChangeInProgress = false;
     debugPrint("[_onSongSelected] Cleared manual change and song change in progress flags");
+
+    await _playSong(reorderedSongs.first);
   }
 
   Future<void> _onSearchSongSelected(
@@ -449,12 +448,12 @@ class RadioPlayerBloc extends Bloc<RadioPlayerEvent, RadioPlayerState> {
       ),
     );
 
-    await _playSong(selectedSong);
-
-    // Clear flags after song change is complete
+    // Clear flags BEFORE calling _playSong
     _isManuallyChangingSong = false;
     _isSongChangeInProgress = false;
     debugPrint("[_onSearchSongSelected] Cleared manual change and song change in progress flags");
+
+    await _playSong(selectedSong);
   }
 
   Future<void> _onSongAddToQueueRequested(
@@ -531,12 +530,13 @@ class RadioPlayerBloc extends Bloc<RadioPlayerEvent, RadioPlayerState> {
       ),
     );
     await _saveCurrentQueue(shuffledSongs);
-    await _playSong(shuffledSongs.first);
 
-    // Clear flags after song change is complete
+    // Clear flags BEFORE calling _playSong
     _isManuallyChangingSong = false;
     _isSongChangeInProgress = false;
     debugPrint("[_onShuffleRequested] Cleared manual change and song change in progress flags");
+
+    await _playSong(shuffledSongs.first);
   }
 
   bool canAddToQueue() {
@@ -599,14 +599,14 @@ class RadioPlayerBloc extends Bloc<RadioPlayerEvent, RadioPlayerState> {
 
     await _saveCurrentQueue(updatedSongs);
 
-    await _playSong(
-      updatedSongs.first,
-    );
-
-    // Clear flags after song change is complete
+    // Clear flags BEFORE calling _playSong
     _isManuallyChangingSong = false;
     _isSongChangeInProgress = false;
     debugPrint("[_onNextRequested] Cleared manual change and song change in progress flags");
+
+    await _playSong(
+      updatedSongs.first,
+    );
   }
 
   Future<void> _onPreviousRequested(
@@ -644,13 +644,12 @@ class RadioPlayerBloc extends Bloc<RadioPlayerEvent, RadioPlayerState> {
     );
     await _saveCurrentQueue(updatedSongs);
 
-
-    await _playSong(updatedSongs.first);
-
-    // Clear flags after song change is complete
+    // Clear flags BEFORE calling _playSong
     _isManuallyChangingSong = false;
     _isSongChangeInProgress = false;
     debugPrint("[_onPreviousRequested] Cleared manual change and song change in progress flags");
+
+    await _playSong(updatedSongs.first);
   }
 
   Future<void> _onSeekRequested(
@@ -797,11 +796,11 @@ class RadioPlayerBloc extends Bloc<RadioPlayerEvent, RadioPlayerState> {
 
     await _saveCurrentQueue(updatedSongs);
 
-    await _playSong(nextSong);
-
-    // Clear the song change flag only after everything is done!
+    // Clear the song change flag BEFORE calling _playSong, so next song can trigger completion
     _isSongChangeInProgress = false;
     debugPrint("[_onSongCompleted] cleared song change in progress flag");
+
+    await _playSong(nextSong);
   }
 
 
@@ -809,6 +808,8 @@ class RadioPlayerBloc extends Bloc<RadioPlayerEvent, RadioPlayerState> {
       RadioSong song,
       ) async {
     debugPrint("[_playSong] START - song: ${song.title}");
+    _lastCompletedSongId = null; // Reset last completed song id when starting new song
+    debugPrint("[_playSong] resetting _lastCompletedSongId to null");
     await _audioPlayer.stop();
 
     if (song.audioUrl != null &&
