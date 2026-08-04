@@ -4,7 +4,7 @@ abstract class RadioPlayerEvent extends Equatable {
   const RadioPlayerEvent();
 
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
 class RadioStarted extends RadioPlayerEvent {}
@@ -15,7 +15,7 @@ class RadioPlaylistSearchChanged extends RadioPlayerEvent {
   const RadioPlaylistSearchChanged(this.searchQuery);
 
   @override
-  List<Object> get props => [searchQuery];
+  List<Object?> get props => [searchQuery];
 }
 
 class RadioPlaylistSongSearchVisibilityChanged extends RadioPlayerEvent {
@@ -24,7 +24,7 @@ class RadioPlaylistSongSearchVisibilityChanged extends RadioPlayerEvent {
   const RadioPlaylistSongSearchVisibilityChanged(this.isVisible);
 
   @override
-  List<Object> get props => [isVisible];
+  List<Object?> get props => [isVisible];
 }
 
 class RadioPlaylistSongSearchChanged extends RadioPlayerEvent {
@@ -33,7 +33,7 @@ class RadioPlaylistSongSearchChanged extends RadioPlayerEvent {
   const RadioPlaylistSongSearchChanged(this.searchQuery);
 
   @override
-  List<Object> get props => [searchQuery];
+  List<Object?> get props => [searchQuery];
 }
 
 class RadioPlaylistSearchByChanged extends RadioPlayerEvent {
@@ -42,7 +42,7 @@ class RadioPlaylistSearchByChanged extends RadioPlayerEvent {
   const RadioPlaylistSearchByChanged(this.searchBy);
 
   @override
-  List<Object> get props => [searchBy];
+  List<Object?> get props => [searchBy];
 }
 
 class RadioPlaylistSongSearchRequested extends RadioPlayerEvent {
@@ -55,7 +55,7 @@ class RadioPlaylistSongSearchRequested extends RadioPlayerEvent {
   });
 
   @override
-  List<Object> get props => [searchQuery, searchBy];
+  List<Object?> get props => [searchQuery, searchBy];
 }
 
 class RadioSearchSongSelected extends RadioPlayerEvent {
@@ -64,7 +64,7 @@ class RadioSearchSongSelected extends RadioPlayerEvent {
   const RadioSearchSongSelected(this.songIndex);
 
   @override
-  List<Object> get props => [songIndex];
+  List<Object?> get props => [songIndex];
 }
 
 class RadioSongAddToQueueRequested extends RadioPlayerEvent {
@@ -73,7 +73,7 @@ class RadioSongAddToQueueRequested extends RadioPlayerEvent {
   const RadioSongAddToQueueRequested(this.song);
 
   @override
-  List<Object> get props => [song];
+  List<Object?> get props => [song];
 }
 
 class RadioPlaylistSelected extends RadioPlayerEvent {
@@ -82,7 +82,7 @@ class RadioPlaylistSelected extends RadioPlayerEvent {
   const RadioPlaylistSelected(this.playlistIndex);
 
   @override
-  List<Object> get props => [playlistIndex];
+  List<Object?> get props => [playlistIndex];
 }
 
 class RadioSongSearchChanged extends RadioPlayerEvent {
@@ -91,7 +91,7 @@ class RadioSongSearchChanged extends RadioPlayerEvent {
   const RadioSongSearchChanged(this.searchQuery);
 
   @override
-  List<Object> get props => [searchQuery];
+  List<Object?> get props => [searchQuery];
 }
 
 class RadioSongSelected extends RadioPlayerEvent {
@@ -100,7 +100,7 @@ class RadioSongSelected extends RadioPlayerEvent {
   const RadioSongSelected(this.songIndex);
 
   @override
-  List<Object> get props => [songIndex];
+  List<Object?> get props => [songIndex];
 }
 
 class RadioShuffleRequested extends RadioPlayerEvent {}
@@ -117,7 +117,7 @@ class RadioSeekRequested extends RadioPlayerEvent {
   const RadioSeekRequested(this.position);
 
   @override
-  List<Object> get props => [position];
+  List<Object?> get props => [position];
 }
 
 class _RadioPlaybackChanged extends RadioPlayerEvent {
@@ -126,7 +126,7 @@ class _RadioPlaybackChanged extends RadioPlayerEvent {
   const _RadioPlaybackChanged(this.isPlaying);
 
   @override
-  List<Object> get props => [isPlaying];
+  List<Object?> get props => [isPlaying];
 }
 
 class _RadioDurationChanged extends RadioPlayerEvent {
@@ -135,7 +135,7 @@ class _RadioDurationChanged extends RadioPlayerEvent {
   const _RadioDurationChanged(this.duration);
 
   @override
-  List<Object> get props => [duration];
+  List<Object?> get props => [duration];
 }
 
 class _RadioPositionChanged extends RadioPlayerEvent {
@@ -144,7 +144,23 @@ class _RadioPositionChanged extends RadioPlayerEvent {
   const _RadioPositionChanged(this.position);
 
   @override
-  List<Object> get props => [position];
+  List<Object?> get props => [position];
 }
 
-class _RadioSongCompleted extends RadioPlayerEvent {}
+class _RadioSongCompleted extends RadioPlayerEvent {
+  final int? songId;
+
+  const _RadioSongCompleted(this.songId);
+
+  @override
+  List<Object?> get props => [songId];
+}
+
+class RadioAppLifecycleChanged extends RadioPlayerEvent {
+  final AppLifecycleState state;
+
+  const RadioAppLifecycleChanged(this.state);
+
+  @override
+  List<Object?> get props => [state];
+}

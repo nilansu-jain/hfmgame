@@ -279,8 +279,9 @@ class _LoginState extends State<Login> {
                         if (state.loginApiStatus == LoginApiStatus.success) {
                           showToast(state.message);
                           if (state.gameCode.trim().toLowerCase() ==
-                              "radio" &&
-                              Platform.isIOS) {
+                              "radio"
+                              && Platform.isIOS
+                          ) {
                             Navigator.pushNamedAndRemoveUntil(
                               context,
                               RoutesName.radioPlaylistScreen,

@@ -50,6 +50,13 @@ class Clip {
   int? clipOrderNo;
   int? adId;
   int? isDemoClip;
+  String? songName;
+  String? ClipYear;
+  String? ClipSinger;
+  String? ClipLyricist;
+  String? ClipComposer;
+  String? ClipMovieName;
+
   List<Option>? options;
 
   Clip({
@@ -62,6 +69,12 @@ class Clip {
     this.adId,
     this.isDemoClip,
     this.options,
+    this.ClipComposer,
+    this.ClipLyricist,
+    this.ClipSinger,
+    this.ClipYear,
+    this.songName,
+    this.ClipMovieName,
   });
 
   Clip copyWith({
@@ -74,6 +87,12 @@ class Clip {
     int? adId,
     int? isDemoClip,
     List<Option>? options,
+    String? songName,
+    String? ClipYear,
+    String? ClipSinger,
+    String? ClipLyricist,
+    String? ClipComposer,
+    String? ClipMovieName,
   }) =>
       Clip(
         clipId: clipId ?? this.clipId,
@@ -85,6 +104,12 @@ class Clip {
         adId: adId ?? this.adId,
         isDemoClip: isDemoClip ?? this.isDemoClip,
         options: options ?? this.options,
+        ClipComposer: ClipComposer ?? this.ClipComposer,
+        ClipLyricist: ClipLyricist ?? this.ClipLyricist,
+        ClipSinger: ClipSinger ?? this.ClipSinger,
+        ClipYear: ClipYear ?? this.ClipYear,
+        songName: songName ?? this.songName,
+          ClipMovieName: ClipMovieName ?? this.ClipMovieName
       );
 
   factory Clip.fromRawJson(String str) => Clip.fromJson(json.decode(str));
@@ -100,6 +125,12 @@ class Clip {
     clipOrderNo: json["clip_order_no"],
     adId: json["ad_id"],
     isDemoClip: json["is_demo_clip"],
+    songName: json["songname"],
+    ClipSinger: json["ClipSinger"],
+    ClipLyricist: json["ClipLyricist"],
+    ClipComposer: json["ClipComposer"],
+    ClipYear: json["ClipYear"],
+    ClipMovieName: json["ClipMovieName"],
     options: json["options"] == null ? [] : List<Option>.from(json["options"]!.map((x) => Option.fromJson(x))),
   );
 
@@ -113,6 +144,13 @@ class Clip {
     "ad_id": adId,
     "is_demo_clip": isDemoClip,
     "options": options == null ? [] : List<dynamic>.from(options!.map((x) => x.toJson())),
+    "songname":songName,
+    "ClipYear":ClipYear,
+    "ClipSinger":ClipSinger,
+    "ClipLyricist":ClipLyricist,
+    "ClipComposer":ClipComposer,
+    "ClipMovieName":ClipMovieName
+
   };
 }
 

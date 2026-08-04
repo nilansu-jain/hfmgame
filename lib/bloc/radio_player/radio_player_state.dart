@@ -36,13 +36,13 @@ class RadioPlaylist extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        title,
-        songCount,
-        imageAsset,
-        imageUrl,
-        updatedAt,
-      ];
+    id,
+    title,
+    songCount,
+    imageAsset,
+    imageUrl,
+    updatedAt,
+  ];
 }
 
 class RadioSong extends Equatable {
@@ -93,19 +93,19 @@ class RadioSong extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        title,
-        artist,
-        durationLabel,
-        imageAsset,
-        imageUrl,
-        audioAsset,
-        audioUrl,
-        lyricist,
-        composer,
-        movie,
-        year,
-      ];
+    id,
+    title,
+    artist,
+    durationLabel,
+    imageAsset,
+    imageUrl,
+    audioAsset,
+    audioUrl,
+    lyricist,
+    composer,
+    movie,
+    year,
+  ];
 }
 
 class RadioPlayerState extends Equatable {
@@ -131,10 +131,11 @@ class RadioPlayerState extends Equatable {
   final String songsMessage;
   final String songSearchQuery;
   final bool isSearchPlayback;
-  final int playingSearchSongId;
-  final int playingPlaylistId;
+  final int? playingSearchSongId;
+  final int? playingPlaylistId;
   final List<RadioSong> queueBeforeSearch;
   final RadioSong? playingSong;
+  final int? currentPlayingSongId;
 
   const RadioPlayerState({
     required this.playlists,
@@ -163,6 +164,7 @@ class RadioPlayerState extends Equatable {
     required this.playingPlaylistId,
     required this.queueBeforeSearch,
     required this.playingSong,
+    required this.currentPlayingSongId,
   });
 
   factory RadioPlayerState.initial() {
@@ -189,10 +191,11 @@ class RadioPlayerState extends Equatable {
       songsMessage: '',
       songSearchQuery: '',
       isSearchPlayback: false,
-      playingSearchSongId: 0,
-      playingPlaylistId: -1,
+      playingSearchSongId: null,
+      playingPlaylistId: null,
       queueBeforeSearch: const [],
-      playingSong: null
+      playingSong: null,
+      currentPlayingSongId: null,
     );
   }
 
@@ -212,6 +215,10 @@ class RadioPlayerState extends Equatable {
   }
 
   RadioSong get currentSong {
+    if (playingSong != null) {
+      return playingSong!;
+    }
+
     if (!hasSelectedSong || songs.isEmpty) {
       return const RadioSong(
         title: '',
@@ -225,17 +232,17 @@ class RadioPlayerState extends Equatable {
         year: '',
       );
     }
+
     if (selectedSongIndex >= songs.length) {
       return songs.first;
     }
+
     return songs[selectedSongIndex];
   }
 
   List<RadioPlaylist> get filteredPlaylists {
     final query = playlistSearchQuery.trim().toLowerCase();
-    if (query.isEmpty) {
-      return playlists;
-    }
+    if (query.isEmpty) return playlists;
 
     return playlists.where((playlist) {
       return playlist.title.toLowerCase().contains(query) ||
@@ -245,9 +252,7 @@ class RadioPlayerState extends Equatable {
 
   List<RadioSong> get filteredSongs {
     final query = songSearchQuery.trim().toLowerCase();
-    if (query.isEmpty) {
-      return songs;
-    }
+    if (query.isEmpty) return songs;
 
     return songs.where((song) {
       return song.title.toLowerCase().contains(query) ||
@@ -256,94 +261,95 @@ class RadioPlayerState extends Equatable {
     }).toList();
   }
 
-  RadioPlayerState copyWith({
-    List<RadioPlaylist>? playlists,
-    List<RadioSong>? songs,
-    List<RadioSong>? searchSongs,
-    int? selectedPlaylistIndex,
-    int? selectedSongIndex,
-    bool? isPlaying,
-    bool? hasSelectedSong,
-    Set<int>? playedSongIndexes,
-    Duration? duration,
-    Duration? position,
-    RadioPlaylistStatus? playlistStatus,
-    String? playlistMessage,
-    String? playlistSearchQuery,
-    String? searchQuery,
-    String? playlistSearchBy,
-    bool? isPlaylistSongSearchVisible,
-    RadioSongsStatus? searchSongsStatus,
-    String? searchSongsMessage,
-    RadioSongsStatus? songsStatus,
-    String? songsMessage,
-    String? songSearchQuery,
-    bool? isSearchPlayback,
-    int? playingSearchSongId,
-    int? playingPlaylistId,
-    List<RadioSong>? queueBeforeSearch,
-    RadioSong? playingSong,
-  }) {
-    return RadioPlayerState(
-      playlists: playlists ?? this.playlists,
-      songs: songs ?? this.songs,
-      searchSongs: searchSongs ?? this.searchSongs,
-      selectedPlaylistIndex:
-          selectedPlaylistIndex ?? this.selectedPlaylistIndex,
-      selectedSongIndex: selectedSongIndex ?? this.selectedSongIndex,
-      isPlaying: isPlaying ?? this.isPlaying,
-      hasSelectedSong: hasSelectedSong ?? this.hasSelectedSong,
-      playedSongIndexes: playedSongIndexes ?? this.playedSongIndexes,
-      duration: duration ?? this.duration,
-      position: position ?? this.position,
-      playlistStatus: playlistStatus ?? this.playlistStatus,
-      playlistMessage: playlistMessage ?? this.playlistMessage,
-      playlistSearchQuery: playlistSearchQuery ?? this.playlistSearchQuery,
-      searchQuery: searchQuery ?? this.searchQuery,
-      playlistSearchBy: playlistSearchBy ?? this.playlistSearchBy,
-      isPlaylistSongSearchVisible:
-          isPlaylistSongSearchVisible ?? this.isPlaylistSongSearchVisible,
-      searchSongsStatus: searchSongsStatus ?? this.searchSongsStatus,
-      searchSongsMessage: searchSongsMessage ?? this.searchSongsMessage,
-      songsStatus: songsStatus ?? this.songsStatus,
-      songsMessage: songsMessage ?? this.songsMessage,
-      songSearchQuery: songSearchQuery ?? this.songSearchQuery,
-      playingSearchSongId: playingSearchSongId ?? this.playingSearchSongId,
-      isSearchPlayback: isSearchPlayback ?? this.isSearchPlayback,
-      playingPlaylistId:
-      playingPlaylistId ?? this.playingPlaylistId,
-      queueBeforeSearch: queueBeforeSearch ?? this.queueBeforeSearch,
-      playingSong: playingSong ?? this.playingSong
-    );
-  }
+RadioPlayerState copyWith({
+List<RadioPlaylist>? playlists,
+List<RadioSong>? songs,
+List<RadioSong>? searchSongs,
+int? selectedPlaylistIndex,
+int? selectedSongIndex,
+bool? isPlaying,
+bool? hasSelectedSong,
+Set<int>? playedSongIndexes,
+Duration? duration,
+Duration? position,
+RadioPlaylistStatus? playlistStatus,
+String? playlistMessage,
+String? playlistSearchQuery,
+String? searchQuery,
+String? playlistSearchBy,
+bool? isPlaylistSongSearchVisible,
+RadioSongsStatus? searchSongsStatus,
+String? searchSongsMessage,
+RadioSongsStatus? songsStatus,
+String? songsMessage,
+String? songSearchQuery,
+bool? isSearchPlayback,
+int? playingSearchSongId,
+int? playingPlaylistId,
+List<RadioSong>? queueBeforeSearch,
+RadioSong? playingSong,
+int? currentPlayingSongId,
+}) {
+return RadioPlayerState(
+playlists: playlists ?? this.playlists,
+songs: songs ?? this.songs,
+searchSongs: searchSongs ?? this.searchSongs,
+selectedPlaylistIndex: selectedPlaylistIndex ?? this.selectedPlaylistIndex,
+selectedSongIndex: selectedSongIndex ?? this.selectedSongIndex,
+isPlaying: isPlaying ?? this.isPlaying,
+hasSelectedSong: hasSelectedSong ?? this.hasSelectedSong,
+playedSongIndexes: playedSongIndexes ?? this.playedSongIndexes,
+duration: duration ?? this.duration,
+position: position ?? this.position,
+playlistStatus: playlistStatus ?? this.playlistStatus,
+playlistMessage: playlistMessage ?? this.playlistMessage,
+playlistSearchQuery: playlistSearchQuery ?? this.playlistSearchQuery,
+searchQuery: searchQuery ?? this.searchQuery,
+playlistSearchBy: playlistSearchBy ?? this.playlistSearchBy,
+isPlaylistSongSearchVisible:
+isPlaylistSongSearchVisible ?? this.isPlaylistSongSearchVisible,
+searchSongsStatus: searchSongsStatus ?? this.searchSongsStatus,
+searchSongsMessage: searchSongsMessage ?? this.searchSongsMessage,
+songsStatus: songsStatus ?? this.songsStatus,
+songsMessage: songsMessage ?? this.songsMessage,
+songSearchQuery: songSearchQuery ?? this.songSearchQuery,
+isSearchPlayback: isSearchPlayback ?? this.isSearchPlayback,
+playingSearchSongId: playingSearchSongId ?? this.playingSearchSongId,
+playingPlaylistId: playingPlaylistId ?? this.playingPlaylistId,
+queueBeforeSearch: queueBeforeSearch ?? this.queueBeforeSearch,
+playingSong: playingSong ?? this.playingSong,
+currentPlayingSongId: currentPlayingSongId ?? this.currentPlayingSongId,
+);
+}
 
-  @override
-  List<Object?> get props => [
-        playlists,
-        songs,
-        searchSongs,
-        selectedPlaylistIndex,
-        selectedSongIndex,
-        isPlaying,
-        hasSelectedSong,
-        playedSongIndexes,
-        duration,
-        position,
-        playlistStatus,
-        playlistMessage,
-        playlistSearchQuery,
-        searchQuery,
-        playlistSearchBy,
-        isPlaylistSongSearchVisible,
-        searchSongsStatus,
-        searchSongsMessage,
-        songsStatus,
-        songsMessage,
-        songSearchQuery,
-        isSearchPlayback,
-        playingSearchSongId,
-    playingPlaylistId,
-    queueBeforeSearch,
-    playingSong
-      ];
+@override
+List<Object?> get props => [
+playlists,
+songs,
+searchSongs,
+selectedPlaylistIndex,
+selectedSongIndex,
+isPlaying,
+hasSelectedSong,
+playedSongIndexes,
+duration,
+position,
+playlistStatus,
+playlistMessage,
+playlistSearchQuery,
+searchQuery,
+playlistSearchBy,
+isPlaylistSongSearchVisible,
+searchSongsStatus,
+searchSongsMessage,
+songsStatus,
+songsMessage,
+songSearchQuery,
+isSearchPlayback,
+playingSearchSongId,
+playingPlaylistId,
+queueBeforeSearch,
+playingSong,
+currentPlayingSongId,
+];
 }

@@ -18,6 +18,13 @@ class _RadioPlayerScreenState extends State<RadioPlayerScreen> {
   Duration _seekPosition = Duration.zero;
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+  }
+
+  @override
   Widget build(BuildContext context) {
     return
       BlocListener<RadioPlayerBloc,RadioPlayerState>(
