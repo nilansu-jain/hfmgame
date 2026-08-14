@@ -55,7 +55,9 @@ dependencies:
   image_picker: ^1.1.2                 # Latest compatible
   dio: ^5.4.3
   audio_session: 0.2.2
-
+  just_audio_background: ^0.0.1-beta.13
+  audio_service: ^0.18.19
+  shared_preferences: ^2.5.5
 
 
 

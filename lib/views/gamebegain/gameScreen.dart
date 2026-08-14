@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:audio_service/audio_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
@@ -171,8 +172,7 @@ class _GameScreenState extends State<GameScreen> {
           }
 
           else if (scoreMap.isNotEmpty &&
-              clipscreen["data"]["clip_id"].toString().contains(
-                  globalClipScoreboardClipId.toString())) {
+              clipscreen["data"]["clip_id"].toString() == globalClipScoreboardClipId.toString()) {
             calculatePlayersAndRanking(
                 scoreMap, clipscreen['data']['clip_id'].toString());
             debugPrint("ranking 00");
@@ -181,9 +181,7 @@ class _GameScreenState extends State<GameScreen> {
               debugPrint("ranking 11");
 
 
-              if (clipscreen['data']['clip_id'].toString().contains(
-                  globalShowCumulativeScore['data']["current_clip_id"]
-                      .toString())) {
+              if (clipscreen['data']['clip_id'].toString() == globalShowCumulativeScore['data']["current_clip_id"].toString()) {
                 showRanking = true;
                 setState(() {
 
@@ -207,6 +205,8 @@ class _GameScreenState extends State<GameScreen> {
             getOptionResultForGraph();
           }
           else {
+            debugPrint("🔥 REALTIME DATA: $data");
+
             performAnswer = false;
             selectedOption = 0;
             isPaused = false;
@@ -338,11 +338,34 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   Future<void> playAudio(String url) async {
+    debugPrint("Game Data Model :: ${gameDataModel.toJson()}");
     if (gameDataModel.gameSound?.toLowerCase().contains("off") ?? false) return;
     try {
-      await _player.setUrl(url);
-      _player.play();
-    } catch (e) {}
+      final mediaItem = MediaItem(
+        id: currentClip.clipId?.toString() ?? '',
+        title: currentClip.songName ?? 'Clip Audio',
+        artist: currentClip.ClipSinger ?? '',
+        album: currentClip.ClipMovieName ?? '',
+        duration: Duration(seconds: currentClip.timerLength ?? 20),
+        artUri: null,
+      );
+
+      final source = AudioSource.uri(
+        Uri.parse(url),
+        tag: mediaItem,
+      );
+
+      await _player.setAudioSource(source);
+      await _player.play();
+    } catch (e) {
+      debugPrint("playAudio error: $e");
+    }
+    // try {
+    //   await _player.setUrl(url);
+    //   _player.play();
+    // } catch (e) {
+    //   debugPrint("Error while playing song ${e.toString()}");
+    // }
   }
 
   void startTimer() {
@@ -384,7 +407,7 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   submitAnswer(String answerId, String answer) {
-
+    debugPrint("Selected answer $answer");
     int clipTimer = currentClip.timerLength ?? 0;
     var responseTime = clipTimer - current;
     int clipScore = currentClipScore;

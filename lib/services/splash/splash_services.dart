@@ -11,7 +11,7 @@ class SplashServices{
   void isLogin(BuildContext context){
 
     SessionController().getUserPreference().then((value){
-      debugPrint("${SessionController().isLogin}");
+      debugPrint("is Login ${SessionController().isLogin}");
       if(SessionController().isLogin ?? false){
         UserModel userModel= SessionController().userModel;
         String game_code = userModel.user?.gameCode ?? "";

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:audio_service/audio_service.dart';
 import 'package:audio_session/audio_session.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
@@ -9,7 +10,9 @@ import 'package:gaanap_admin_new/models/radio/radio_playlist_model.dart';
 import 'package:gaanap_admin_new/repository/radio/radio_repository.dart';
 import 'package:gaanap_admin_new/services/storage/local_storage.dart';
 import 'package:just_audio/just_audio.dart';
-
+import 'package:just_audio_background/just_audio_background.dart';
+import 'package:just_audio/just_audio.dart';
+import 'package:audio_session/audio_session.dart';
 part 'radio_player_event.dart';
 part 'radio_player_state.dart';
 
@@ -682,11 +685,11 @@ class RadioPlayerBloc extends Bloc<RadioPlayerEvent, RadioPlayerState> {
       ) async {
     debugPrint("[_onSongCompleted] ENTERED");
 
-    if(_isAppInBackground){
-      debugPrint("[_onSongCompleted] App is in background");
-      return;
-
-    }
+    // if(_isAppInBackground){
+    //   debugPrint("[_onSongCompleted] App is in background");
+    //   return;
+    //
+    // }
     if (!state.hasSelectedSong || state.songs.isEmpty) {
       debugPrint("[_onSongCompleted] no selected song or songs empty");
       return;
@@ -769,27 +772,89 @@ class RadioPlayerBloc extends Bloc<RadioPlayerEvent, RadioPlayerState> {
     debugPrint("[_onSongCompleted] done");
   }
 
+  // Future<void> _playSong(RadioSong song) async {
+  //   debugPrint("[_playSong] START song=${song.title}, id=${song.id}");
+  //
+  //   _currentPlayingSongId = song.id;
+  //
+  //   try {
+  //     if (song.audioUrl != null && song.audioUrl!.startsWith('http')) {
+  //       debugPrint("[_playSong] loading url=${song.audioUrl}");
+  //       await _audioPlayer.setUrl(song.audioUrl!);
+  //     } else {
+  //       debugPrint("[_playSong] loading asset=${song.audioAsset}");
+  //       await _audioPlayer.setAsset(song.audioAsset);
+  //     }
+  //
+  //     await _audioPlayer.play();
+  //
+  //     debugPrint("[_playSong] PLAYING song=${song.title}");
+  //   } catch (e) {
+  //     debugPrint("[_playSong] ERROR: $e");
+  //     _isSongChangeInProgress = false;
+  //   }
+  // }
+
   Future<void> _playSong(RadioSong song) async {
     debugPrint("[_playSong] START song=${song.title}, id=${song.id}");
 
     _currentPlayingSongId = song.id;
 
     try {
-      if (song.audioUrl != null && song.audioUrl!.startsWith('http')) {
-        debugPrint("[_playSong] loading url=${song.audioUrl}");
-        await _audioPlayer.setUrl(song.audioUrl!);
+      // Create MediaItem for just_audio_background
+      final mediaItem = MediaItem(
+        id: song.id?.toString() ?? '',
+        title: song.title,
+        artist: song.artist,
+        album: song.movie.isNotEmpty ? song.movie : null,
+        duration: _parseDurationFromLabel(song.durationLabel), // helper below
+        artUri: song.imageUrl != null && song.imageUrl!.startsWith('http')
+            ? Uri.parse(song.imageUrl!)
+            : null,
+      );
+
+      final sourceUrl = song.audioUrl != null && song.audioUrl!.startsWith('http')
+          ? song.audioUrl!
+          : null;
+
+      final AudioSource audioSource;
+
+      if (sourceUrl != null) {
+        audioSource = AudioSource.uri(
+          Uri.parse(sourceUrl),
+          tag: mediaItem,
+        );
       } else {
-        debugPrint("[_playSong] loading asset=${song.audioAsset}");
-        await _audioPlayer.setAsset(song.audioAsset);
+        // For assets, use asset URI
+        final assetUri = Uri.parse('asset://${song.audioAsset}');
+        audioSource = AudioSource.uri(
+          assetUri,
+          tag: mediaItem,
+        );
       }
 
+      await _audioPlayer.setAudioSource(audioSource);
       await _audioPlayer.play();
+
+      await AudioService.updateMediaItem(mediaItem);
 
       debugPrint("[_playSong] PLAYING song=${song.title}");
     } catch (e) {
       debugPrint("[_playSong] ERROR: $e");
-      _isSongChangeInProgress = false;
     }
+  }
+
+  Duration _parseDurationFromLabel(String label) {
+    // Expect something like "03:45" or "3:45"
+    final parts = label.split(':');
+    if (parts.length == 2) {
+      try {
+        final minutes = int.parse(parts[0].trim());
+        final seconds = int.parse(parts[1].trim());
+        return Duration(minutes: minutes, seconds: seconds);
+      } catch (_) {}
+    }
+    return Duration.zero;
   }
 
   Future<void> _configureAudioSession() async {
@@ -798,7 +863,19 @@ class RadioPlayerBloc extends Bloc<RadioPlayerEvent, RadioPlayerState> {
     try {
       final session = await AudioSession.instance;
       await session.configure(
-        const AudioSessionConfiguration.music(),
+        const AudioSessionConfiguration(
+          avAudioSessionCategory: AVAudioSessionCategory.playback,
+          avAudioSessionCategoryOptions: AVAudioSessionCategoryOptions.mixWithOthers,
+          avAudioSessionMode: AVAudioSessionMode.defaultMode,
+          avAudioSessionRouteSharingPolicy: AVAudioSessionRouteSharingPolicy.defaultPolicy,
+          avAudioSessionSetActiveOptions: AVAudioSessionSetActiveOptions.none,
+          androidAudioAttributes: AndroidAudioAttributes(
+            contentType: AndroidAudioContentType.music,
+            usage: AndroidAudioUsage.media,
+          ),
+          androidAudioFocusGainType: AndroidAudioFocusGainType.gain,
+          // androidWillPauseWhenDuckedWithGuidance: false,
+        ),
       );
       _audioConfigured = true;
     } catch (e) {

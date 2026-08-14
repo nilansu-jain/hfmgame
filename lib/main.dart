@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:gaanap_admin_new/bloc/event/event_bloc.dart';
 import 'package:gaanap_admin_new/repository/auth/login_http_repository.dart';
@@ -9,6 +10,7 @@ import 'package:gaanap_admin_new/repository/movie_repo/movies_repository.dart';
 import 'package:gaanap_admin_new/repository/radio/radio_http_repository.dart';
 import 'package:gaanap_admin_new/repository/radio/radio_repository.dart';
 import 'package:get_it/get_it.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 
 import 'bloc/login/login_bloc.dart';
 import 'config/routes/routes.dart';
@@ -26,6 +28,14 @@ void main() async {
   );
 
   serviceLocator();
+  // Initialize just_audio_background only on iOS
+  if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
+    await JustAudioBackground.init(
+      androidNotificationChannelId: 'com.hfmgame', // any string is fine on iOS
+      androidNotificationChannelName: 'Radio Playback',
+      androidNotificationOngoing: true,
+    );
+  }
   runApp(
     MultiProvider(
       providers: [

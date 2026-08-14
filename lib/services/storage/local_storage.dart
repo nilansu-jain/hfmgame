@@ -1,35 +1,39 @@
 import 'dart:convert';
 
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class LocalStorage{
+class LocalStorage {
+  // Static shared instance
+  static final Future<SharedPreferences> _prefsFuture =
+  SharedPreferences.getInstance();
 
-  final storage = const FlutterSecureStorage();
-  static const _storage = FlutterSecureStorage();
-
-  Future<bool>  addData(String key, String value) async{
-    await storage.write(key: key, value: value);
-    return true;
+  // Instance methods (if you still use them somewhere)
+  Future<bool> addData(String key, String value) async {
+    final prefs = await _prefsFuture;
+    return await prefs.setString(key, value);
   }
 
-  Future<dynamic> getData(String key) async{
-    return await storage.read(key: key);
+  Future<dynamic> getData(String key) async {
+    final prefs = await _prefsFuture;
+    return prefs.getString(key);
   }
 
-  Future<bool> deleteData(String key) async{
-    await storage.delete(key: key);
-    return true;
+  Future<bool> deleteData(String key) async {
+    final prefs = await _prefsFuture;
+    return await prefs.remove(key);
   }
 
   /// Save model
   static Future<void> saveModel(String key, dynamic model) async {
+    final prefs = await _prefsFuture;
     final jsonString = jsonEncode(model);
-    await _storage.write(key: key, value: jsonString);
+    await prefs.setString(key, jsonString);
   }
 
   /// Read model
   static Future<Map<String, dynamic>?> readModel(String key) async {
-    final jsonString = await _storage.read(key: key);
+    final prefs = await _prefsFuture;
+    final jsonString = prefs.getString(key);
     if (jsonString == null) return null;
 
     return jsonDecode(jsonString);
@@ -37,7 +41,8 @@ class LocalStorage{
 
   /// Delete model
   static Future<bool> delete(String key) async {
-    await _storage.delete(key: key);
+    final prefs = await _prefsFuture;
+    await prefs.remove(key);
     return true;
   }
 }
